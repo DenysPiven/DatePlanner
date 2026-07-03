@@ -21,7 +21,6 @@
   const progressBar = $('#progressBar');
   const stepLabel = $('#stepLabel');
   const toast = $('#toast');
-  let introTimer = null;
   let introIndex = 0;
 
   function applyLocale() {
@@ -58,22 +57,20 @@
 
     if (name === 'intro') {
       stepLabel.textContent = UI.welcome;
-      startIntroCarousel();
     } else {
-      stopIntroCarousel();
       stepLabel.textContent = UI.step(Math.min(state.screenIndex, TOTAL_SCREENS - 1), TOTAL_SCREENS - 1);
     }
   }
 
-  /* —— Intro —— */
+  /* —— Intro album (manual only) —— */
   function renderIntro() {
     const photos = PROFILE.photos;
-    $('#introGallery').innerHTML = photos.map((p, i) => `
+    $('#introSlides').innerHTML = photos.map((p, i) => `
       <div class="intro__slide${i === 0 ? ' intro__slide--active' : ''}" style="background-image:url('${p.src}')"></div>
     `).join('');
 
     $('#introDots').innerHTML = photos.map((_, i) =>
-      `<button type="button" class="intro__dot${i === 0 ? ' intro__dot--active' : ''}" data-intro="${i}"></button>`
+      `<button type="button" class="intro__dot${i === 0 ? ' intro__dot--active' : ''}" data-intro="${i}" aria-label="Photo ${i + 1}"></button>`
     ).join('');
 
     $('#introMeta').textContent = UI.ageCity(PROFILE.age, PROFILE.city);
@@ -81,29 +78,54 @@
     $('#introTagline').textContent = PROFILE.tagline;
     $('#introText').textContent = PROFILE.bio;
 
+    showIntroSlide(0);
+
     $$('#introDots .intro__dot').forEach((dot) => {
       dot.addEventListener('click', () => showIntroSlide(Number(dot.dataset.intro)));
     });
+
+    $('#introPrev').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showIntroSlide(introIndex - 1);
+    });
+    $('#introNext').addEventListener('click', (e) => {
+      e.stopPropagation();
+      showIntroSlide(introIndex + 1);
+    });
+
+    bindIntroSwipe($('#introGallery'));
   }
 
   function showIntroSlide(i) {
+    const total = PROFILE.photos.length;
+    if (i < 0 || i >= total) return;
+
     introIndex = i;
     $$('.intro__slide').forEach((el, idx) => el.classList.toggle('intro__slide--active', idx === i));
     $$('.intro__dot').forEach((el, idx) => el.classList.toggle('intro__dot--active', idx === i));
+    $('#introCounter').textContent = `${i + 1} / ${total}`;
+    $('#introPrev').hidden = i === 0;
+    $('#introNext').hidden = i === total - 1;
   }
 
-  function startIntroCarousel() {
-    stopIntroCarousel();
-    introTimer = setInterval(() => {
-      showIntroSlide((introIndex + 1) % PROFILE.photos.length);
-    }, 3500);
-  }
+  function bindIntroSwipe(gallery) {
+    let startX = 0;
+    let startY = 0;
 
-  function stopIntroCarousel() {
-    if (introTimer) {
-      clearInterval(introTimer);
-      introTimer = null;
-    }
+    gallery.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+    }, { passive: true });
+
+    gallery.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) showIntroSlide(introIndex + 1);
+      else showIntroSlide(introIndex - 1);
+    }, { passive: true });
   }
 
   /* —— Branching questions —— */

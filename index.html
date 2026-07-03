@@ -25,7 +25,12 @@
       <!-- Intro: her photos + short bio -->
       <section class="step step--active" data-screen="intro">
         <div class="intro">
-          <div class="intro__gallery" id="introGallery"></div>
+          <div class="intro__gallery" id="introGallery">
+            <div class="intro__slides" id="introSlides"></div>
+            <button type="button" class="intro__nav intro__nav--prev" id="introPrev" aria-label="Previous photo"></button>
+            <button type="button" class="intro__nav intro__nav--next" id="introNext" aria-label="Next photo"></button>
+            <div class="intro__counter" id="introCounter"></div>
+          </div>
           <div class="intro__dots" id="introDots"></div>
           <div class="intro__meta" id="introMeta"></div>
           <h1 class="intro__title" id="introTitle"></h1>

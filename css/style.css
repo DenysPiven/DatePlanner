@@ -156,6 +156,13 @@ body::before {
   box-shadow: var(--shadow);
   margin-bottom: 12px;
   background: var(--bg-card);
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.intro__slides {
+  position: absolute;
+  inset: 0;
 }
 
 .intro__slide {
@@ -164,11 +171,47 @@ body::before {
   background-size: cover;
   background-position: center top;
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
 }
 
 .intro__slide--active {
   opacity: 1;
+}
+
+.intro__nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 42%;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.intro__nav--prev { left: 0; }
+.intro__nav--next { right: 0; }
+
+.intro__nav[hidden] {
+  display: none;
+}
+
+.intro__counter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  pointer-events: none;
 }
 
 .intro__dots {
