@@ -11,14 +11,13 @@ const PROFILE = {
   bio: 'Senior Java Developer 🇺🇦 Люблю живі розмови і вечірні прогулянки. Без ігор і тиску. Нижче — коротко про тебе і план вечора; «мені заходить» — те, що мені ближче.',
 
   photos: [
-    { src: 'images/profile/01.jpg', caption: 'Привіт' },
     { src: 'images/profile/06.jpg', caption: 'Осінь' },
     { src: 'images/profile/07.jpg', caption: 'Природа' },
     { src: 'images/profile/08.jpg', caption: 'Настрій' },
+    { src: 'images/profile/01.jpg', caption: 'Привіт' },
     { src: 'images/profile/03.jpg', caption: 'Про мене' },
     { src: 'images/profile/04.jpg', caption: 'Вінниця' },
-    { src: 'images/profile/05.jpg', caption: 'Ще трохи' },
-    { src: 'images/profile/00-avatar.jpg', caption: '@pivden2000' }
+    { src: 'images/profile/05.jpg', caption: 'Ще трохи' }
   ]
 };
 
