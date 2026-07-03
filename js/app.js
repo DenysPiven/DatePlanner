@@ -222,36 +222,16 @@
 
   /* —— Intro album (manual only) —— */
   function renderIntro() {
-    const photos = PROFILE.photos;
-    $('#introSlides').innerHTML = photos.map((p, i) => `
-      <div class="intro__slide${i === 0 ? ' intro__slide--active' : ''}" style="background-image:url('${p.src}')"></div>
-    `).join('');
-
-    $('#introDots').innerHTML = photos.map((_, i) =>
-      `<button type="button" class="intro__dot${i === 0 ? ' intro__dot--active' : ''}" data-intro="${i}" aria-label="Photo ${i + 1}"></button>`
-    ).join('');
+    // Hide photo gallery - photos not loading
+    const gallery = $('#introGallery');
+    if (gallery) gallery.style.display = 'none';
+    const dots = $('#introDots');
+    if (dots) dots.style.display = 'none';
 
     $('#introMeta').textContent = UI.ageCity(PROFILE.age, PROFILE.city, PROFILE.instagram);
     $('#introTitle').textContent = PROFILE.name;
     $('#introTagline').textContent = PROFILE.tagline;
     $('#introText').textContent = PROFILE.bio;
-
-    showIntroSlide(0);
-
-    $$('#introDots .intro__dot').forEach((dot) => {
-      dot.addEventListener('click', () => showIntroSlide(Number(dot.dataset.intro)));
-    });
-
-    $('#introPrev').addEventListener('click', (e) => {
-      e.stopPropagation();
-      showIntroSlide(introIndex - 1);
-    });
-    $('#introNext').addEventListener('click', (e) => {
-      e.stopPropagation();
-      showIntroSlide(introIndex + 1);
-    });
-
-    bindIntroSwipe($('#introGallery'));
   }
 
   function showIntroSlide(i) {
