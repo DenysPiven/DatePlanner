@@ -420,21 +420,34 @@ body::before {
   color: var(--accent);
 }
 
-/* This-or-that choice */
-.choice__round {
-  text-align: center;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--accent);
-  margin: -12px 0 14px;
-  letter-spacing: 0.02em;
-}
-
+/* Branching choices */
 .choice {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding-bottom: 12px;
+}
+
+.choice--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.choice--grid .choice__photo {
+  height: min(18vh, 110px);
+}
+
+.choice--grid .choice__title {
+  font-size: 0.95rem;
+}
+
+.choice--grid .choice__desc {
+  font-size: 0.78rem;
+}
+
+.choice--grid .choice__body {
+  padding: 10px 12px 12px;
 }
 
 .choice__or {

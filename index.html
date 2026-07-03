@@ -22,7 +22,8 @@
     </header>
 
     <main class="main" id="main">
-      <section class="step step--active" data-step="0">
+      <!-- Intro: her photos + short bio -->
+      <section class="step step--active" data-screen="intro">
         <div class="intro">
           <div class="intro__gallery" id="introGallery"></div>
           <div class="intro__dots" id="introDots"></div>
@@ -30,43 +31,12 @@
           <h1 class="intro__title" id="introTitle"></h1>
           <p class="intro__tagline" id="introTagline"></p>
           <p class="intro__text" id="introText"></p>
-          <button class="btn btn--primary btn--large" data-action="next" id="startBtn"></button>
+          <button class="btn btn--primary btn--large" id="startBtn"></button>
         </div>
       </section>
 
-      <section class="step" data-step="1">
-        <h2 class="step__title" id="aboutHerTitle"></h2>
-        <p class="step__subtitle" id="aboutHerSub"></p>
-        <div class="story" id="storyStack"></div>
-        <div class="story__nav">
-          <button class="btn btn--ghost" id="storyPrev" type="button">←</button>
-          <span class="story__counter" id="storyCounter"></span>
-          <button class="btn btn--primary" id="storyNext" type="button"></button>
-        </div>
-      </section>
-
-      <section class="step" data-step="2">
-        <h2 class="step__title" id="priorityTitle"></h2>
-        <p class="step__subtitle" id="prioritySub"></p>
-        <p class="choice__round" id="priorityRound"></p>
-        <div class="choice" id="priorityChoice"></div>
-      </section>
-
-      <section class="step" data-step="3">
-        <h2 class="step__title" id="foodTitle"></h2>
-        <p class="step__subtitle" id="foodSub"></p>
-        <p class="choice__round" id="foodRound"></p>
-        <div class="choice" id="foodChoice"></div>
-      </section>
-
-      <section class="step" data-step="4">
-        <h2 class="step__title" id="activityTitle"></h2>
-        <p class="step__subtitle" id="activitySub"></p>
-        <p class="choice__round" id="activityRound"></p>
-        <div class="choice" id="activityChoice"></div>
-      </section>
-
-      <section class="step" data-step="5">
+      <!-- When -->
+      <section class="step" data-screen="when">
         <h2 class="step__title" id="whenTitle"></h2>
         <p class="step__subtitle" id="whenSub"></p>
         <form class="form" id="datetimeForm">
@@ -89,27 +59,29 @@
         </form>
       </section>
 
-      <section class="step" data-step="6">
-        <h2 class="step__title" id="whereTitle"></h2>
-        <p class="step__subtitle" id="whereSub"></p>
-        <p class="choice__round" id="placeRound"></p>
-        <div class="choice" id="placeChoice"></div>
+      <!-- Branching choices (reused) -->
+      <section class="step" data-screen="question">
+        <h2 class="step__title" id="questionTitle"></h2>
+        <p class="step__subtitle" id="questionSub"></p>
+        <div class="choice" id="choiceList"></div>
       </section>
 
-      <section class="step" data-step="7">
+      <!-- Application -->
+      <section class="step" data-screen="apply">
         <h2 class="step__title" id="applyTitle"></h2>
         <p class="step__subtitle" id="applySub"></p>
         <div class="summary__card" id="previewCard"></div>
         <form class="form" id="applyForm">
           <label class="field">
             <span class="field__label" id="labelInstagram"></span>
-            <input class="field__input" type="text" name="instagram" id="instagramInput" placeholder="@username" required inputmode="text" autocomplete="username" maxlength="40">
+            <input class="field__input" type="text" name="instagram" id="instagramInput" required inputmode="text" autocomplete="username" maxlength="40">
           </label>
           <button class="btn btn--primary btn--large" type="submit" id="submitBtn"></button>
         </form>
       </section>
 
-      <section class="step" data-step="8">
+      <!-- Done -->
+      <section class="step" data-screen="done">
         <div class="done">
           <div class="done__icon">💌</div>
           <h2 class="step__title" id="doneTitle"></h2>
