@@ -227,7 +227,7 @@
       `<button type="button" class="intro__dot${i === 0 ? ' intro__dot--active' : ''}" data-intro="${i}" aria-label="Photo ${i + 1}"></button>`
     ).join('');
 
-    $('#introMeta').textContent = UI.ageCity(PROFILE.age, PROFILE.city);
+    $('#introMeta').textContent = UI.ageCity(PROFILE.age, PROFILE.city, PROFILE.instagram);
     $('#introTitle').textContent = PROFILE.name;
     $('#introTagline').textContent = PROFILE.tagline;
     $('#introText').textContent = PROFILE.bio;

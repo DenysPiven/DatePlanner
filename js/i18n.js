@@ -47,5 +47,11 @@ const UI = {
   toastSent: '✅ Заявку надіслано',
   toastError: 'Не вдалось надіслати. Спробуй ще раз або напиши в Instagram',
   toastInstagram: 'Вкажи Instagram',
-  ageCity: (age, city) => (age ? `${age} · ${city}` : city)
+  ageCity: (age, city, instagram) => {
+    const parts = [];
+    if (age) parts.push(String(age));
+    if (city) parts.push(city);
+    if (instagram) parts.push('@' + String(instagram).replace(/^@/, ''));
+    return parts.join(' · ');
+  }
 };

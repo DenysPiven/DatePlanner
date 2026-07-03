@@ -6,22 +6,16 @@ const PROFILE = {
   name: 'Денис',
   age: null,
   city: 'Вінниця',
+  instagram: 'pivden2000',
   tagline: 'Шукаю ту, з ким захочеться залишитись на другу каву',
-  bio: 'Люблю живі розмови і вечірні прогулянки. Без ігор і тиску. Нижче — коротко про тебе і приблизний план вечора; варіанти з міткою «мені заходить» — те, що мені ближче.',
+  bio: 'Senior Java Developer 🇺🇦 Люблю живі розмови і вечірні прогулянки. Без ігор і тиску. Нижче — коротко про тебе і план вечора; «мені заходить» — те, що мені ближче.',
 
   photos: [
-    {
-      src: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=900&q=80',
-      caption: 'Привіт'
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80',
-      caption: 'Про мене'
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=900&q=80',
-      caption: 'Вінниця'
-    }
+    { src: 'images/profile/01.jpg', caption: 'Привіт' },
+    { src: 'images/profile/03.jpg', caption: 'Про мене' },
+    { src: 'images/profile/04.jpg', caption: 'Вінниця' },
+    { src: 'images/profile/05.jpg', caption: 'Ще трохи' },
+    { src: 'images/profile/00-avatar.jpg', caption: '@pivden2000' }
   ]
 };
 
