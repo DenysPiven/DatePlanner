@@ -1,14 +1,17 @@
 (function () {
   'use strict';
 
-  /** Fixed path length for progress: intro → when → 5 questions → apply → done */
-  const TOTAL_SCREENS = 8;
+  /**
+   * Path length varies slightly (place step optional).
+   * Progress uses an estimated max of 10 screens.
+   */
+  const TOTAL_SCREENS = 10;
 
   const state = {
     screenIndex: 0,
     datetime: {},
     answers: {},
-    questionId: 'venue',
+    questionId: 'lifestyle',
     instagram: ''
   };
 
@@ -57,7 +60,7 @@
       startIntroCarousel();
     } else {
       stopIntroCarousel();
-      stepLabel.textContent = UI.step(state.screenIndex, TOTAL_SCREENS - 1);
+      stepLabel.textContent = UI.step(Math.min(state.screenIndex, TOTAL_SCREENS - 1), TOTAL_SCREENS - 1);
     }
   }
 
@@ -105,19 +108,29 @@
   /* —— Branching questions —— */
   function startQuestions() {
     state.answers = {};
-    state.questionId = 'venue';
-    state.screenIndex = 2;
-    renderQuestion('venue');
+    state.questionId = 'lifestyle';
+    state.screenIndex = 1;
+    renderQuestion('lifestyle');
   }
 
-  function renderQuestion(id) {
-    if (id === 'apply') {
-      state.screenIndex = TOTAL_SCREENS - 2;
+  function goNext(nextId) {
+    state.screenIndex++;
+
+    if (nextId === 'when') {
+      showScreen('when');
+      return;
+    }
+
+    if (nextId === 'apply') {
       renderPreview();
       showScreen('apply');
       return;
     }
 
+    renderQuestion(nextId);
+  }
+
+  function renderQuestion(id) {
     const q = QUESTIONS[id];
     if (!q) return;
 
@@ -141,8 +154,9 @@
 
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'choice__card';
+      btn.className = 'choice__card' + (opt.recommended ? ' choice__card--recommended' : '');
       btn.innerHTML = `
+        ${opt.recommended ? `<span class="choice__badge">${UI.recommended}</span>` : ''}
         <div class="choice__photo" style="background-image:url('${opt.photo}')"></div>
         <div class="choice__body">
           <div class="choice__title">${opt.title}</div>
@@ -164,8 +178,7 @@
       else c.classList.add('choice__card--lost');
     });
 
-    state.screenIndex++;
-    setTimeout(() => renderQuestion(option.next), 280);
+    setTimeout(() => goNext(option.next), 280);
   }
 
   /* —— Summary & apply —— */
@@ -174,48 +187,42 @@
     return d.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
-  function buildPlanLines() {
-    const a = state.answers;
-    const lines = [];
+  const PLAN_KEYS = ['duration', 'venue', 'drink', 'meal_style', 'after', 'place'];
+  const ABOUT_KEYS = ['lifestyle', 'energy', 'topics'];
 
-    if (a.venue) lines.push(a.venue.title);
-    if (a.drink) lines.push(a.drink.title);
-    if (a.meal) lines.push(a.meal.title);
-    if (a.walk) lines.push(a.walk.id === 'walk_yes' ? 'Прогулянка: так' : 'Прогулянка: ні');
-    if (a.place_walk) lines.push(a.place_walk.title);
-    if (a.place_stay) lines.push(a.place_stay.title);
-    if (a.duration) lines.push(a.duration.title);
-
-    return lines;
+  function linesFromKeys(keys) {
+    return keys
+      .map((k) => state.answers[k])
+      .filter(Boolean)
+      .map((o) => o.title);
   }
 
-  function placePhoto() {
+  function planPhoto() {
     const a = state.answers;
-    const place = a.place_walk || a.place_stay || a.venue;
-    return place ? place.photo : '';
-  }
-
-  function placeTitle() {
-    const a = state.answers;
-    const place = a.place_walk || a.place_stay;
-    return place ? place.title : (a.venue ? a.venue.title : '');
+    const item = a.place || a.after || a.venue;
+    return item ? item.photo : PROFILE.photos[0].src;
   }
 
   function renderPreview() {
     const dateFormatted = formatDate(state.datetime.date);
-    const lines = buildPlanLines();
+    const about = linesFromKeys(ABOUT_KEYS).join(' · ');
+    const plan = linesFromKeys(PLAN_KEYS).join(' → ');
 
     $('#previewCard').innerHTML = `
-      <div class="preview-place" style="background-image:url('${placePhoto()}')">
-        <div class="preview-place__label">${placeTitle()}</div>
+      <div class="preview-place" style="background-image:url('${planPhoto()}')">
+        <div class="preview-place__label">${(state.answers.place || state.answers.venue || {}).title || ''}</div>
       </div>
       <div class="summary__row">
         <span class="summary__row-icon">📅</span>
         <div><span class="summary__row-label">${UI.summaryWhen}</span>${dateFormatted}, ${state.datetime.time}</div>
       </div>
       <div class="summary__row">
+        <span class="summary__row-icon">👤</span>
+        <div><span class="summary__row-label">${UI.summaryAbout}</span>${about}</div>
+      </div>
+      <div class="summary__row">
         <span class="summary__row-icon">💫</span>
-        <div><span class="summary__row-label">${UI.summaryPlan}</span>${lines.join(' → ')}</div>
+        <div><span class="summary__row-label">${UI.summaryPlan}</span>${plan}</div>
       </div>
     `;
   }
@@ -229,16 +236,19 @@
   }
 
   function buildApplicationPayload() {
-    const lines = buildPlanLines();
     return {
       instagram: '@' + state.instagram,
       when: `${state.datetime.date} ${state.datetime.time}`,
-      plan: lines.join(' → '),
-      venue: state.answers.venue ? state.answers.venue.title : '',
-      drinkOrMeal: (state.answers.drink || state.answers.meal || {}).title || '',
-      walk: state.answers.walk ? state.answers.walk.title : '',
-      place: placeTitle(),
-      duration: state.answers.duration ? state.answers.duration.title : '',
+      about: linesFromKeys(ABOUT_KEYS).join(' · '),
+      plan: linesFromKeys(PLAN_KEYS).join(' → '),
+      lifestyle: (state.answers.lifestyle || {}).title || '',
+      energy: (state.answers.energy || {}).title || '',
+      duration: (state.answers.duration || {}).title || '',
+      topics: (state.answers.topics || {}).title || '',
+      venue: (state.answers.venue || {}).title || '',
+      drinkOrMeal: (state.answers.drink || state.answers.meal_style || {}).title || '',
+      after: (state.answers.after || {}).title || '',
+      place: (state.answers.place || {}).title || '',
       city: PROFILE.city,
       submittedAt: new Date().toISOString()
     };
@@ -267,12 +277,16 @@
         _subject: `Заявка: ${payload.instagram}`,
         instagram: payload.instagram,
         when: payload.when,
+        about: payload.about,
         plan: payload.plan,
+        lifestyle: payload.lifestyle,
+        energy: payload.energy,
+        duration: payload.duration,
+        topics: payload.topics,
         venue: payload.venue,
         drinkOrMeal: payload.drinkOrMeal,
-        walk: payload.walk,
+        after: payload.after,
         place: payload.place,
-        duration: payload.duration,
         city: payload.city,
         submittedAt: payload.submittedAt
       })
@@ -317,15 +331,16 @@
 
   function bindEvents() {
     $('#startBtn').addEventListener('click', () => {
-      state.screenIndex = 1;
-      showScreen('when');
+      startQuestions();
     });
 
     $('#datetimeForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
       state.datetime = { date: fd.get('date'), time: fd.get('time') };
-      startQuestions();
+      state.screenIndex++;
+      renderPreview();
+      showScreen('apply');
     });
 
     $$('#timeChips .chip').forEach((chip) => {

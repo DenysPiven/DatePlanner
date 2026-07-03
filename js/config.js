@@ -8,7 +8,7 @@ const PROFILE = {
   city: 'Вінниця',
   tagline: 'Шукаю того, з ким захочеться залишитись на другу каву',
   /** Short bio under the photos */
-  bio: 'Люблю живі розмови і вечірні прогулянки. Без ігор і тиску — просто приємно провести час.',
+  bio: 'Люблю живі розмови і вечірні прогулянки. Без ігор і тиску. Нижче — коротко про тебе і приблизний план вечора; варіанти з міткою «мені заходить» — те, що мені ближче.',
   /** FormSubmit delivers applications to this email. Confirm once via their email. */
   applicationEmail: '',
   photos: [

@@ -8,9 +8,10 @@ const UI = {
   start: 'Далі',
   next: 'Далі',
   or: 'або',
+  recommended: 'мені заходить',
 
-  whenTitle: 'Коли зустрінемось?',
-  whenSub: 'Обери день і час',
+  whenTitle: 'Коли зручно?',
+  whenSub: 'Обери день і час — план уже є',
   date: 'Дата',
   time: 'Час',
 
@@ -27,6 +28,7 @@ const UI = {
 
   summaryWhen: 'Коли',
   summaryPlan: 'План',
+  summaryAbout: 'Про тебе',
 
   toastSent: '✅ Заявку надіслано',
   toastError: 'Не вдалось надіслати. Спробуй ще раз',

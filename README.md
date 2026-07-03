@@ -1,23 +1,28 @@
 # DatePlanner
 
-Personal date invitation for Tinder. She shares the link; he reads a short intro, answers a **linear branching** questionnaire, leaves Instagram.
+Personal date invitation. She shares the link; he answers a **branching** questionnaire and leaves Instagram.
 
 Live: https://denyspiven.github.io/DatePlanner/
 
-## Flow
+## Flow (why this order)
 
-1. Her photos + short bio
-2. When (date & time)
-3. Cafe **or** restaurant
-4. If cafe → coffee **or** tea; if restaurant → light **or** hearty meal
-5. Walk — yes **or** no
-6. Where exactly (depends on walk)
-7. How long
-8. Instagram only
+1. Her photos + short bio  
+2. **About him** — lifestyle, free time (filter vibe first)  
+3. **Duration** — early (30–60 min … 4h+)  
+4. **Talk topics** — what they discuss at the table  
+5. **Venue** — cafe / restaurant / pizza / sushi  
+6. Drink or meal detail (branch)  
+7. **After** — park, embankment, active, another place, or “as it goes”  
+8. Specific spot in Vinnytsia (if not “as it goes”)  
+9. **When**  
+10. Instagram only  
+
+Options with `recommended: true` show a **«мені заходить»** badge (her preferences). Edit in `js/data.js`.
 
 ## Customize
 
-Edit `js/config.js` (name, photos, bio, `applicationEmail`) and `js/data.js` (questions & branches).
+- `js/config.js` — name, photos, bio, `applicationEmail`
+- `js/data.js` — questions, branches, recommended flags
 
 ## Local dev
 
