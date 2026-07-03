@@ -2,21 +2,18 @@
   'use strict';
 
   const TOTAL_STEPS = 9;
-  const SWIPE_STEPS = {
-    2: { key: 'priority', cards: () => PRIORITY_CARDS, container: 'prioritySwipe', counter: 'priorityCounter' },
-    3: { key: 'food', cards: () => SWIPE_CARDS.food, container: 'foodSwipe', counter: 'foodCounter' },
-    4: { key: 'activity', cards: () => SWIPE_CARDS.activity, container: 'activitySwipe', counter: 'activityCounter' }
-  };
 
   const state = {
     step: 0,
     storyIndex: 0,
     introIndex: 0,
-    likes: { priority: [], food: [], activity: [] },
-    datetime: {},
+    priorities: [],
+    food: null,
+    activity: null,
     place: null,
-    applicant: {},
-    swipers: {}
+    datetime: {},
+    instagram: '',
+    choosers: {}
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -25,9 +22,6 @@
   const progressBar = $('#progressBar');
   const stepLabel = $('#stepLabel');
   const toast = $('#toast');
-
-  let map = null;
-  let markers = [];
   let introTimer = null;
 
   function applyLocale() {
@@ -49,12 +43,10 @@
     $('#datetimeNextBtn').textContent = UI.next;
     $('#whereTitle').textContent = UI.whereTitle;
     $('#whereSub').textContent = UI.whereSub;
-    $('#placeNextBtn').textContent = UI.next;
     $('#applyTitle').textContent = UI.applyTitle;
     $('#applySub').textContent = UI.applySub;
-    $('#labelName').textContent = UI.yourName;
-    $('#labelNote').textContent = UI.note;
-    $('#noteInput').placeholder = UI.notePlaceholder;
+    $('#labelInstagram').textContent = UI.instagram;
+    $('#instagramInput').placeholder = UI.instagramPlaceholder;
     $('#submitBtn').textContent = UI.submit;
     $('#doneTitle').textContent = UI.doneTitle;
     $('#doneText').textContent = UI.doneText;
@@ -84,15 +76,166 @@
     }
 
     if (n === 1) renderStory();
-    if (n === 6) initMapStep();
+    if (n === 2) startPriorityChoices();
+    if (n === 3) startFoodTournament();
+    if (n === 4) startActivityTournament();
+    if (n === 6) startPlaceTournament();
     if (n === 7) renderPreview();
   }
 
-  /* —— Intro gallery —— */
+  function optionTitle(item) {
+    return item.title || item.name || '';
+  }
+
+  function optionDesc(item) {
+    return item.desc || item.type || '';
+  }
+
+  function renderChoicePair(container, left, right, onPick) {
+    container.innerHTML = `
+      <button type="button" class="choice__card" data-side="left">
+        <div class="choice__photo" style="background-image:url('${left.photo}')"></div>
+        <div class="choice__body">
+          <div class="choice__title">${optionTitle(left)}</div>
+          <div class="choice__desc">${optionDesc(left)}</div>
+        </div>
+      </button>
+      <div class="choice__or">${UI.or}</div>
+      <button type="button" class="choice__card" data-side="right">
+        <div class="choice__photo" style="background-image:url('${right.photo}')"></div>
+        <div class="choice__body">
+          <div class="choice__title">${optionTitle(right)}</div>
+          <div class="choice__desc">${optionDesc(right)}</div>
+        </div>
+      </button>
+    `;
+
+    container.querySelectorAll('.choice__card').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const winner = btn.dataset.side === 'left' ? left : right;
+        btn.classList.add('choice__card--picked');
+        container.querySelectorAll('.choice__card').forEach((c) => {
+          if (c !== btn) c.classList.add('choice__card--lost');
+        });
+        setTimeout(() => onPick(winner), 280);
+      });
+    });
+  }
+
+  /** Fixed A-or-B pairs (priorities). */
+  function startPriorityChoices() {
+    const pairs = PRIORITY_PAIRS;
+    let index = 0;
+    const picks = [];
+    const container = $('#priorityChoice');
+    const roundEl = $('#priorityRound');
+
+    function show() {
+      if (index >= pairs.length) {
+        state.priorities = picks;
+        goToStep(3);
+        return;
+      }
+      const [left, right] = pairs[index];
+      roundEl.textContent = UI.round(index + 1, pairs.length);
+      renderChoicePair(container, left, right, (winner) => {
+        picks.push(winner.id);
+        index++;
+        show();
+      });
+    }
+
+    show();
+  }
+
+  /** Knockout tournament — one winner. */
+  function startTournament({ options, containerId, roundId, onComplete }) {
+    let queue = shuffle([...options]);
+    let nextRound = [];
+    const totalMatches = options.length - 1;
+    let played = 0;
+    const container = document.getElementById(containerId);
+    const roundEl = document.getElementById(roundId);
+
+    function advance() {
+      if (queue.length === 1 && nextRound.length === 0) {
+        onComplete(queue[0]);
+        return;
+      }
+
+      if (queue.length === 0) {
+        queue = nextRound;
+        nextRound = [];
+      }
+
+      if (queue.length === 1) {
+        nextRound.push(queue.shift());
+        advance();
+        return;
+      }
+
+      const left = queue.shift();
+      const right = queue.shift();
+      played++;
+      roundEl.textContent = UI.round(played, totalMatches);
+      renderChoicePair(container, left, right, (winner) => {
+        nextRound.push(winner);
+        advance();
+      });
+    }
+
+    advance();
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function startFoodTournament() {
+    startTournament({
+      options: FOOD_OPTIONS,
+      containerId: 'foodChoice',
+      roundId: 'foodRound',
+      onComplete: (winner) => {
+        state.food = winner;
+        goToStep(4);
+      }
+    });
+  }
+
+  function startActivityTournament() {
+    startTournament({
+      options: ACTIVITY_OPTIONS,
+      containerId: 'activityChoice',
+      roundId: 'activityRound',
+      onComplete: (winner) => {
+        state.activity = winner;
+        goToStep(5);
+      }
+    });
+  }
+
+  function startPlaceTournament() {
+    startTournament({
+      options: PLACE_OPTIONS,
+      containerId: 'placeChoice',
+      roundId: 'placeRound',
+      onComplete: (winner) => {
+        state.place = winner;
+        goToStep(7);
+      }
+    });
+  }
+
+  /* —— Intro —— */
   function renderIntro() {
     const photos = PROFILE.photos;
-    const gallery = $('#introGallery');
-    gallery.innerHTML = photos.map((p, i) => `
+    $('#introGallery').innerHTML = photos.map((p, i) => `
       <div class="intro__slide${i === 0 ? ' intro__slide--active' : ''}" style="background-image:url('${p.src}')"></div>
     `).join('');
 
@@ -117,20 +260,15 @@
 
   function showIntroSlide(i) {
     state.introIndex = i;
-    $$('.intro__slide').forEach((el, idx) => {
-      el.classList.toggle('intro__slide--active', idx === i);
-    });
-    $$('.intro__dot').forEach((el, idx) => {
-      el.classList.toggle('intro__dot--active', idx === i);
-    });
+    $$('.intro__slide').forEach((el, idx) => el.classList.toggle('intro__slide--active', idx === i));
+    $$('.intro__dot').forEach((el, idx) => el.classList.toggle('intro__dot--active', idx === i));
     updateIntroCaption(i);
   }
 
   function startIntroCarousel() {
     stopIntroCarousel();
     introTimer = setInterval(() => {
-      const next = (state.introIndex + 1) % PROFILE.photos.length;
-      showIntroSlide(next);
+      showIntroSlide((state.introIndex + 1) % PROFILE.photos.length);
     }, 3500);
   }
 
@@ -141,7 +279,7 @@
     }
   }
 
-  /* —— Story about her —— */
+  /* —— Story —— */
   function renderStory() {
     const photos = PROFILE.photos;
     const i = state.storyIndex;
@@ -176,218 +314,24 @@
     }
   }
 
-  /* —— Swipe stacks —— */
-  class SwipeStack {
-    constructor(stepNum) {
-      const cfg = SWIPE_STEPS[stepNum];
-      this.stepNum = stepNum;
-      this.key = cfg.key;
-      this.container = document.getElementById(cfg.container);
-      this.counterEl = document.getElementById(cfg.counter);
-      this.cards = [...cfg.cards()];
-      this.index = 0;
-      this.currentEl = null;
-      this.drag = { active: false, startX: 0, startY: 0, x: 0, y: 0 };
-      this.render();
-    }
-
-    render() {
-      this.container.innerHTML = '';
-      if (this.index >= this.cards.length) {
-        goToStep(this.stepNum + 1);
-        return;
-      }
-
-      const card = this.cards[this.index];
-      const el = document.createElement('div');
-      el.className = 'swipe-card';
-      el.innerHTML = `
-        <div class="swipe-card__bg" style="background-image:url('${card.photo}')"></div>
-        <div class="swipe-card__overlay"></div>
-        <div class="swipe-card__stamp swipe-card__stamp--yes">${UI.swipeYes}</div>
-        <div class="swipe-card__stamp swipe-card__stamp--no">${UI.swipeNo}</div>
-        <div class="swipe-card__content">
-          <div class="swipe-card__title">${card.title}</div>
-          <div class="swipe-card__desc">${card.desc}</div>
-        </div>
-      `;
-      this.container.appendChild(el);
-      this.currentEl = el;
-      this.bindEvents(el);
-      this.counterEl.textContent = `${this.index + 1} / ${this.cards.length}`;
-    }
-
-    bindEvents(el) {
-      const onStart = (e) => {
-        const pt = e.touches ? e.touches[0] : e;
-        this.drag = { active: true, startX: pt.clientX, startY: pt.clientY, x: 0, y: 0 };
-      };
-
-      const onMove = (e) => {
-        if (!this.drag.active) return;
-        e.preventDefault();
-        const pt = e.touches ? e.touches[0] : e;
-        this.drag.x = pt.clientX - this.drag.startX;
-        this.drag.y = pt.clientY - this.drag.startY;
-        el.style.transform = `translate(${this.drag.x}px, ${this.drag.y}px) rotate(${this.drag.x * 0.08}deg)`;
-        el.querySelector('.swipe-card__stamp--yes').style.opacity = Math.min(Math.max(this.drag.x / 80, 0), 1);
-        el.querySelector('.swipe-card__stamp--no').style.opacity = Math.min(Math.max(-this.drag.x / 80, 0), 1);
-      };
-
-      const onEnd = () => {
-        if (!this.drag.active) return;
-        this.drag.active = false;
-        if (Math.abs(this.drag.x) > 100) {
-          this.swipe(this.drag.x > 0 ? 'right' : 'left');
-        } else {
-          el.classList.add('swipe-card--animating');
-          el.style.transform = '';
-          el.querySelector('.swipe-card__stamp--yes').style.opacity = 0;
-          el.querySelector('.swipe-card__stamp--no').style.opacity = 0;
-          setTimeout(() => el.classList.remove('swipe-card--animating'), 350);
-        }
-      };
-
-      el.addEventListener('mousedown', onStart);
-      el.addEventListener('touchstart', onStart, { passive: true });
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('touchmove', onMove, { passive: false });
-      window.addEventListener('mouseup', onEnd);
-      window.addEventListener('touchend', onEnd);
-    }
-
-    swipe(direction) {
-      const card = this.cards[this.index];
-      if (direction === 'right') state.likes[this.key].push(card.id);
-
-      const el = this.currentEl;
-      el.classList.add('swipe-card--animating');
-      const offX = direction === 'right' ? 400 : -400;
-      el.style.transform = `translate(${offX}px, ${this.drag.y}px) rotate(${offX * 0.05}deg)`;
-      el.style.opacity = '0';
-
-      setTimeout(() => {
-        this.index++;
-        this.render();
-      }, 300);
-    }
-  }
-
-  function initSwipers() {
-    Object.keys(SWIPE_STEPS).forEach((step) => {
-      state.swipers[step] = new SwipeStack(Number(step));
-    });
-  }
-
-  function handleSwipeButtons(e) {
-    const btn = e.target.closest('[data-swipe]');
-    if (!btn) return;
-    const swiper = state.swipers[state.step];
-    if (swiper) swiper.swipe(btn.dataset.swipe);
-  }
-
-  /* —— Places —— */
-  function scorePlace(place) {
-    const all = [...state.likes.food, ...state.likes.activity, ...state.likes.priority];
-    return place.tags.filter((t) => all.includes(t)).length;
-  }
-
-  function initMapStep() {
-    const places = [...VINNYTSIA.places].sort((a, b) => scorePlace(b) - scorePlace(a));
-    const list = $('#placesList');
-    list.innerHTML = '';
-
-    places.forEach((place, i) => {
-      const card = document.createElement('div');
-      card.className = 'place-card' + (i === 0 ? ' place-card--active' : '');
-      card.dataset.id = place.id;
-      card.innerHTML = `
-        <div class="place-card__photo" style="background-image:url('${place.photo}')"></div>
-        <div class="place-card__body">
-          <div class="place-card__name">${place.name}</div>
-          <div class="place-card__type">${place.type}</div>
-        </div>
-      `;
-      card.addEventListener('click', () => selectPlace(place, card));
-      list.appendChild(card);
-    });
-
-    if (!state.place) state.place = places[0];
-    $('#placeNextBtn').disabled = !state.place;
-
-    if (map) {
-      map.remove();
-      map = null;
-    }
-
-    setTimeout(() => {
-      map = L.map('map', { zoomControl: false }).setView(VINNYTSIA.center, VINNYTSIA.zoom);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
-
-      markers = [];
-      places.forEach((place) => {
-        const marker = L.marker([place.lat, place.lng]).addTo(map);
-        marker.bindPopup(`<b>${place.name}</b><br>${place.type}`);
-        marker.on('click', () => {
-          const card = list.querySelector(`[data-id="${place.id}"]`);
-          selectPlace(place, card);
-        });
-        markers.push({ place, marker });
-      });
-
-      highlightMarker(state.place);
-      map.invalidateSize();
-    }, 150);
-  }
-
-  function selectPlace(place, cardEl) {
-    state.place = place;
-    $$('.place-card').forEach((c) => c.classList.remove('place-card--active'));
-    if (cardEl) cardEl.classList.add('place-card--active');
-    $('#placeNextBtn').disabled = false;
-    highlightMarker(place);
-    if (map) map.setView([place.lat, place.lng], 15);
-  }
-
-  function highlightMarker(place) {
-    markers.forEach(({ place: p, marker }) => {
-      if (p.id === place.id) marker.openPopup();
-    });
-  }
-
   /* —— Application —— */
   function formatDate(dateStr) {
     const d = new Date(dateStr + 'T12:00:00');
     return d.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
-  function pickLabels(likes, map) {
-    if (!likes.length) return '—';
-    return likes.map((id) => map[id] || id).join(', ');
-  }
-
-  function buildApplicationPayload() {
-    return {
-      name: state.applicant.name,
-      note: state.applicant.note || '',
-      priorities: pickLabels(state.likes.priority, LABELS.priority),
-      food: pickLabels(state.likes.food, LABELS.food),
-      activity: pickLabels(state.likes.activity, LABELS.activity),
-      date: state.datetime.date,
-      time: state.datetime.time,
-      place: state.place.name,
-      placeType: state.place.type,
-      city: VINNYTSIA.name,
-      submittedAt: new Date().toISOString()
-    };
+  function normalizeInstagram(value) {
+    let v = (value || '').trim();
+    v = v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '');
+    v = v.replace(/\/.*$/, '');
+    v = v.replace(/^@/, '');
+    return v;
   }
 
   function renderPreview() {
-    const food = pickLabels(state.likes.food, LABELS.food);
-    const activity = pickLabels(state.likes.activity, LABELS.activity);
-    const priorities = pickLabels(state.likes.priority, LABELS.priority);
+    const priorities = state.priorities
+      .map((id) => LABELS.priority[id] || id)
+      .join(' · ');
     const dateFormatted = formatDate(state.datetime.date);
 
     $('#previewCard').innerHTML = `
@@ -403,18 +347,32 @@
         <div><span class="summary__row-label">${UI.summaryPlace}</span>${state.place.name}</div>
       </div>
       <div class="summary__row">
-        <span class="summary__row-icon">💗</span>
-        <div><span class="summary__row-label">${UI.summaryPriorities}</span>${priorities}</div>
-      </div>
-      <div class="summary__row">
         <span class="summary__row-icon">🍽</span>
-        <div><span class="summary__row-label">${UI.summaryFood}</span>${food}</div>
+        <div><span class="summary__row-label">${UI.summaryFood}</span>${state.food.title}</div>
       </div>
       <div class="summary__row">
         <span class="summary__row-icon">🎯</span>
-        <div><span class="summary__row-label">${UI.summaryActivity}</span>${activity}</div>
+        <div><span class="summary__row-label">${UI.summaryActivity}</span>${state.activity.title}</div>
+      </div>
+      <div class="summary__row">
+        <span class="summary__row-icon">💗</span>
+        <div><span class="summary__row-label">${UI.summaryPriorities}</span>${priorities}</div>
       </div>
     `;
+  }
+
+  function buildApplicationPayload() {
+    return {
+      instagram: '@' + state.instagram,
+      priorities: state.priorities.map((id) => LABELS.priority[id] || id).join(', '),
+      food: state.food.title,
+      activity: state.activity.title,
+      date: state.datetime.date,
+      time: state.datetime.time,
+      place: state.place.name,
+      city: PROFILE.city,
+      submittedAt: new Date().toISOString()
+    };
   }
 
   function saveLocal(payload) {
@@ -437,9 +395,8 @@
         Accept: 'application/json'
       },
       body: JSON.stringify({
-        _subject: `Заявка на побачення: ${payload.name}`,
-        name: payload.name,
-        note: payload.note,
+        _subject: `Заявка: ${payload.instagram}`,
+        instagram: payload.instagram,
         priorities: payload.priorities,
         food: payload.food,
         activity: payload.activity,
@@ -454,19 +411,19 @@
 
   async function handleApply(e) {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    state.applicant = {
-      name: fd.get('name').trim(),
-      note: fd.get('note').trim()
-    };
+    const handle = normalizeInstagram($('#instagramInput').value);
+    if (!handle) {
+      showToast(UI.toastInstagram);
+      return;
+    }
 
+    state.instagram = handle;
     const btn = $('#submitBtn');
     btn.disabled = true;
     btn.textContent = UI.submitting;
 
     try {
-      const payload = buildApplicationPayload();
-      const ok = await sendApplication(payload);
+      const ok = await sendApplication(buildApplicationPayload());
       if (!ok) throw new Error('send failed');
       showToast(UI.toastSent);
       goToStep(8);
@@ -489,8 +446,6 @@
     document.addEventListener('click', (e) => {
       if (e.target.closest('[data-action="next"]')) goToStep(state.step + 1);
     });
-
-    document.addEventListener('click', handleSwipeButtons);
 
     $('#storyNext').addEventListener('click', storyNext);
     $('#storyPrev').addEventListener('click', storyPrev);
@@ -518,7 +473,6 @@
     applyLocale();
     renderIntro();
     initDateDefaults();
-    initSwipers();
     bindEvents();
     goToStep(0);
   }

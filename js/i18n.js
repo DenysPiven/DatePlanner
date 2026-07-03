@@ -2,53 +2,54 @@
  * Ukrainian questionnaire copy (user-facing UI only).
  */
 const UI = {
-  brand: (name) => name,
   welcome: 'Знайомство',
   step: (n, total) => `${n} / ${total}`,
 
   start: 'Хочу на побачення',
   next: 'Далі',
-  swipeYes: 'ТАК',
-  swipeNo: 'НІ',
+  or: 'або',
 
   aboutHerTitle: 'Трохи про мене',
   aboutHerSub: 'Гортай фото — так зрозумієш, чи ми на одній хвилі',
 
-  priorityTitle: 'Що для мене важливо',
-  prioritySub: 'Свайп вправо — якщо це про тебе. Вліво — якщо ні',
+  priorityTitle: 'Що тобі ближче?',
+  prioritySub: 'Обери одне з двох — не можна все одразу',
 
   foodTitle: 'Що поїсти?',
-  foodSub: 'Обери, що тобі заходить',
+  foodSub: 'Обери одне. Переможець іде далі',
   activityTitle: 'Чим зайнятись?',
-  activitySub: 'Як проведемо час у Вінниці',
+  activitySub: 'Знову вибір: це або це',
 
   whenTitle: 'Коли зручно?',
   whenSub: 'Обери день і час — я подивлюсь, чи підходить',
   date: 'Дата',
   time: 'Час',
 
-  whereTitle: 'Куди підемо Вінницею?',
-  whereSub: 'Обери місце з фото — або на карті',
+  whereTitle: 'Куди підемо?',
+  whereSub: 'Одне місце на вечір. Обери між двома',
 
   applyTitle: 'Залишити заявку',
-  applySub: 'Без телефону і соцмереж. Якщо підійдеш — я напишу тобі в Тіндері',
-  yourName: "Твоє ім'я (як у Тіндері)",
-  note: 'Кілька слів про себе (необовʼязково)',
-  notePlaceholder: 'Наприклад: люблю кіно і довгі прогулянки…',
+  applySub: 'Лише Instagram — решта вже там. Якщо підійдеш, напишу тобі',
+  instagram: 'Твій Instagram',
+  instagramPlaceholder: '@username',
   submit: 'Надіслати заявку',
   submitting: 'Надсилаю…',
 
   doneTitle: 'Заявку надіслано',
-  doneText: 'Я подивлюсь відповіді і сама вирішу, з ким піти. Якщо відгукнусь — напишу тобі в Тіндері.',
+  doneText: 'Я подивлюсь відповіді і сама вирішу, з ким піти. Якщо відгукнусь — напишу в Instagram.',
   doneHint: 'Можеш закрити сторінку',
 
-  summaryPriorities: 'Що відгукнулось',
+  summaryPriorities: 'Твої вибори',
   summaryFood: 'Їжа',
   summaryActivity: 'Активність',
   summaryWhen: 'Коли',
   summaryPlace: 'Місце',
 
+  round: (n, total) => `Раунд ${n} з ${total}`,
+  pickOne: 'Обери одне',
+
   toastSent: '✅ Заявку надіслано',
   toastError: 'Не вдалось надіслати. Спробуй ще раз',
+  toastInstagram: 'Вкажи Instagram',
   ageCity: (age, city) => `${age} · ${city}`
 };

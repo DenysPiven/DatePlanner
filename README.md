@@ -9,11 +9,11 @@ Live: https://denyspiven.github.io/DatePlanner/
 ## Flow
 
 1. Her photos & story
-2. Questions she cares about (intentions, respect, communication…)
-3. Food & activities (photo cards)
+2. Value dilemmas — **this or that** (one pick per pair)
+3. Food & activities — **knockout tournament** (one winner each)
 4. Date & time
-5. Places in **Vinnytsia** (photos + map)
-6. Application: name + optional note — **no contacts, no Telegram**
+5. Places in **Vinnytsia** — tournament, one place
+6. Application: **Instagram only**
 
 ## Customize
 

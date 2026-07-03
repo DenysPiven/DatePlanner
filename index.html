@@ -6,7 +6,6 @@
   <meta name="theme-color" content="#1a0a2e">
   <meta name="description" content="Анкета на побачення у Вінниці">
   <title>Побачення у Вінниці</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,7 +22,6 @@
     </header>
 
     <main class="main" id="main">
-      <!-- 0: Her intro -->
       <section class="step step--active" data-step="0">
         <div class="intro">
           <div class="intro__gallery" id="introGallery"></div>
@@ -36,7 +34,6 @@
         </div>
       </section>
 
-      <!-- 1: About her (photo story) -->
       <section class="step" data-step="1">
         <h2 class="step__title" id="aboutHerTitle"></h2>
         <p class="step__subtitle" id="aboutHerSub"></p>
@@ -48,43 +45,27 @@
         </div>
       </section>
 
-      <!-- 2: Priority questions (what girls care about) -->
       <section class="step" data-step="2">
         <h2 class="step__title" id="priorityTitle"></h2>
         <p class="step__subtitle" id="prioritySub"></p>
-        <div class="swipe" id="prioritySwipe"></div>
-        <div class="swipe__actions">
-          <button class="swipe__btn swipe__btn--no" data-swipe="left" aria-label="No">✕</button>
-          <button class="swipe__btn swipe__btn--yes" data-swipe="right" aria-label="Yes">♥</button>
-        </div>
-        <p class="swipe__counter" id="priorityCounter"></p>
+        <p class="choice__round" id="priorityRound"></p>
+        <div class="choice" id="priorityChoice"></div>
       </section>
 
-      <!-- 3: Food -->
       <section class="step" data-step="3">
         <h2 class="step__title" id="foodTitle"></h2>
         <p class="step__subtitle" id="foodSub"></p>
-        <div class="swipe" id="foodSwipe"></div>
-        <div class="swipe__actions">
-          <button class="swipe__btn swipe__btn--no" data-swipe="left" aria-label="No">✕</button>
-          <button class="swipe__btn swipe__btn--yes" data-swipe="right" aria-label="Yes">♥</button>
-        </div>
-        <p class="swipe__counter" id="foodCounter"></p>
+        <p class="choice__round" id="foodRound"></p>
+        <div class="choice" id="foodChoice"></div>
       </section>
 
-      <!-- 4: Activities -->
       <section class="step" data-step="4">
         <h2 class="step__title" id="activityTitle"></h2>
         <p class="step__subtitle" id="activitySub"></p>
-        <div class="swipe" id="activitySwipe"></div>
-        <div class="swipe__actions">
-          <button class="swipe__btn swipe__btn--no" data-swipe="left" aria-label="No">✕</button>
-          <button class="swipe__btn swipe__btn--yes" data-swipe="right" aria-label="Yes">♥</button>
-        </div>
-        <p class="swipe__counter" id="activityCounter"></p>
+        <p class="choice__round" id="activityRound"></p>
+        <div class="choice" id="activityChoice"></div>
       </section>
 
-      <!-- 5: When -->
       <section class="step" data-step="5">
         <h2 class="step__title" id="whenTitle"></h2>
         <p class="step__subtitle" id="whenSub"></p>
@@ -108,36 +89,26 @@
         </form>
       </section>
 
-      <!-- 6: Places -->
       <section class="step" data-step="6">
         <h2 class="step__title" id="whereTitle"></h2>
         <p class="step__subtitle" id="whereSub"></p>
-        <div class="places">
-          <div class="places__list" id="placesList"></div>
-          <div class="places__map" id="map"></div>
-        </div>
-        <button class="btn btn--primary btn--large" id="placeNextBtn" disabled data-action="next"></button>
+        <p class="choice__round" id="placeRound"></p>
+        <div class="choice" id="placeChoice"></div>
       </section>
 
-      <!-- 7: Application -->
       <section class="step" data-step="7">
         <h2 class="step__title" id="applyTitle"></h2>
         <p class="step__subtitle" id="applySub"></p>
         <div class="summary__card" id="previewCard"></div>
         <form class="form" id="applyForm">
           <label class="field">
-            <span class="field__label" id="labelName"></span>
-            <input class="field__input" type="text" name="name" placeholder="Олексій" required autocomplete="given-name" maxlength="40">
-          </label>
-          <label class="field">
-            <span class="field__label" id="labelNote"></span>
-            <textarea class="field__textarea field__textarea--short" name="note" id="noteInput" rows="3" maxlength="280"></textarea>
+            <span class="field__label" id="labelInstagram"></span>
+            <input class="field__input" type="text" name="instagram" id="instagramInput" placeholder="@username" required inputmode="text" autocomplete="username" maxlength="40">
           </label>
           <button class="btn btn--primary btn--large" type="submit" id="submitBtn"></button>
         </form>
       </section>
 
-      <!-- 8: Done -->
       <section class="step" data-step="8">
         <div class="done">
           <div class="done__icon">💌</div>
@@ -151,7 +122,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/config.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/data.js"></script>
