@@ -12,6 +12,9 @@ const PROFILE = {
 
   photos: [
     { src: 'images/profile/01.jpg', caption: 'Привіт' },
+    { src: 'images/profile/06.jpg', caption: 'Осінь' },
+    { src: 'images/profile/07.jpg', caption: 'Природа' },
+    { src: 'images/profile/08.jpg', caption: 'Настрій' },
     { src: 'images/profile/03.jpg', caption: 'Про мене' },
     { src: 'images/profile/04.jpg', caption: 'Вінниця' },
     { src: 'images/profile/05.jpg', caption: 'Ще трохи' },
