@@ -163,7 +163,7 @@
       </details>`;
   }
 
-  function cardHtml(app, index) {
+  function cardHtml(app, number) {
     const device = app.device;
     return `
       <article class="inbox-card">
@@ -180,7 +180,7 @@
         <div class="inbox-card__row"><span>План</span><div class="inbox-card__value">${escapeHtml(app.plan || '—')}</div></div>
         <div class="inbox-card__row"><span>Пристрій</span><div class="inbox-card__value">${escapeHtml(deviceSummary(device))}</div></div>
         ${deviceExtraHtml(device)}
-        <div class="inbox-card__meta">#${index + 1}</div>
+        <div class="inbox-card__meta">#${number}</div>
       </article>
     `;
   }
@@ -217,7 +217,8 @@
       }
 
       statusEl.textContent = `Всього: ${apps.length}`;
-      listEl.innerHTML = apps.map(cardHtml).join('');
+      // Newest first in the list; numbers go oldest → newest (#1 is first received)
+      listEl.innerHTML = apps.map((app, index) => cardHtml(app, apps.length - index)).join('');
     } catch {
       statusEl.textContent = 'Не вдалось завантажити. Онови сторінку.';
     } finally {
