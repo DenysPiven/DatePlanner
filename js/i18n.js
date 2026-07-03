@@ -32,7 +32,7 @@ const UI = {
   summaryAbout: 'Про тебе',
 
   toastSent: '✅ Заявку надіслано',
-  toastError: 'Не вдалось надіслати. Спробуй ще раз',
+  toastError: 'Не вдалось надіслати. Спробуй ще раз або напиши в Instagram',
   toastInstagram: 'Вкажи Instagram',
   ageCity: (age, city) => `${age} · ${city}`
 };

@@ -319,23 +319,38 @@
     };
   }
 
-  async function sendApplication(payload) {
-    const email = (PROFILE.applicationEmail || '').trim();
-    if (!email) {
-      console.warn('PROFILE.applicationEmail is empty — applications are not delivered.');
-      return false;
-    }
+  function applicationMessage(payload) {
+    return [
+      `Instagram: ${payload.instagram}`,
+      `Коли: ${payload.when}`,
+      `Про нього: ${payload.about}`,
+      `План: ${payload.plan}`,
+      `Місто: ${payload.city}`,
+      `Час заявки: ${payload.submittedAt}`
+    ].join('\n');
+  }
 
-    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
+  function isSuccessFlag(value) {
+    return value === true || value === 'true' || value === 1 || value === '1';
+  }
+
+  async function sendViaWeb3Forms(payload) {
+    const key = (PROFILE.web3formsKey || '').trim();
+    if (!key) return { ok: false, skipped: true };
+
+    const res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
       body: JSON.stringify({
-        _subject: `Заявка на побачення: ${payload.instagram}`,
-        _template: 'table',
-        _captcha: 'false',
+        access_key: key,
+        subject: `Заявка на побачення: ${payload.instagram}`,
+        from_name: 'DatePlanner',
+        name: payload.instagram,
+        email: PROFILE.applicationEmail || 'noreply@dateplanner.local',
+        message: applicationMessage(payload),
         instagram: payload.instagram,
         when: payload.when,
         about: payload.about,
@@ -349,13 +364,103 @@
         after: payload.after,
         place: payload.place,
         city: payload.city,
-        submittedAt: payload.submittedAt
+        botcheck: ''
       })
     });
 
-    if (!res.ok) return false;
     const data = await res.json().catch(() => ({}));
-    return data.success !== false;
+    return { ok: res.ok && isSuccessFlag(data.success), data };
+  }
+
+  async function sendViaFormSubmit(payload) {
+    const email = (PROFILE.applicationEmail || '').trim();
+    if (!email) return { ok: false, skipped: true };
+
+    const body = {
+      name: payload.instagram,
+      email: email,
+      _subject: `Заявка на побачення: ${payload.instagram}`,
+      _replyto: 'noreply@dateplanner.app',
+      message: applicationMessage(payload),
+      instagram: payload.instagram,
+      when: payload.when,
+      about: payload.about,
+      plan: payload.plan,
+      lifestyle: payload.lifestyle,
+      energy: payload.energy,
+      duration: payload.duration,
+      topics: payload.topics,
+      venue: payload.venue,
+      drinkOrMeal: payload.drinkOrMeal,
+      after: payload.after,
+      place: payload.place,
+      city: payload.city,
+      submittedAt: payload.submittedAt
+    };
+
+    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    const msg = String(data.message || '');
+    const needsActivation = /activation|activate form/i.test(msg);
+
+    // FormSubmit returns success as the string "false" when not activated.
+    if (needsActivation) {
+      return { ok: false, needsActivation: true, data };
+    }
+
+    return { ok: res.ok && isSuccessFlag(data.success), data };
+  }
+
+  async function sendViaNtfy(payload) {
+    const topic = (PROFILE.ntfyTopic || '').trim();
+    if (!topic) return { ok: false, skipped: true };
+
+    const res = await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
+      method: 'POST',
+      headers: {
+        Title: `Заявка: ${payload.instagram}`,
+        Priority: 'high',
+        Tags: 'love_letter'
+      },
+      body: applicationMessage(payload)
+    });
+
+    return { ok: res.ok };
+  }
+
+  async function sendApplication(payload) {
+    const results = await Promise.allSettled([
+      sendViaWeb3Forms(payload),
+      sendViaFormSubmit(payload),
+      sendViaNtfy(payload)
+    ]);
+
+    const values = results.map((r) => (r.status === 'fulfilled' ? r.value : { ok: false }));
+    const delivered = values.some((v) => v && v.ok);
+
+    const formSubmit = values[1] || {};
+    if (formSubmit.needsActivation) {
+      console.warn(
+        'FormSubmit: activate email first. Check Spam for "Activate Form" at',
+        PROFILE.applicationEmail
+      );
+    }
+
+    if (!delivered) {
+      values.forEach((v) => {
+        if (v && v.data) console.warn('Delivery:', v.data);
+      });
+    }
+
+    return delivered;
   }
 
   async function handleApply(e) {
