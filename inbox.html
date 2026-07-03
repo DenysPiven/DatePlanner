@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#1a0a2e">
+  <title>Заявки</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/inbox.css">
+</head>
+<body>
+  <div class="app inbox-app">
+    <header class="header">
+      <div class="header__brand">Заявки</div>
+      <div class="inbox-toolbar">
+        <button type="button" class="btn btn--primary" id="refreshBtn">Оновити</button>
+      </div>
+    </header>
+
+    <main class="inbox-main">
+      <p class="inbox-status" id="status">Завантаження…</p>
+      <div class="inbox-list" id="list"></div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/inbox.js"></script>
+</body>
+</html>

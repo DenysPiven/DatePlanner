@@ -319,101 +319,32 @@
     };
   }
 
-  function applicationMessage(payload) {
-    return [
-      `Instagram: ${payload.instagram}`,
-      `Коли: ${payload.when}`,
-      `Про нього: ${payload.about}`,
-      `План: ${payload.plan}`,
-      `Місто: ${payload.city}`,
-      `Час заявки: ${payload.submittedAt}`
-    ].join('\n');
-  }
-
-  function isSuccessFlag(value) {
-    return value === true || value === 'true' || value === 1 || value === '1';
-  }
-
-  /** Gmail via your Google Apps Script (email-worker.gs). */
-  async function sendViaAppsScript(payload) {
-    const url = (PROFILE.appsScriptUrl || '').trim();
-    if (!url) return { ok: false, skipped: true };
-
-    // text/plain + no-cors avoids CORS preflight; GAS still receives the body.
-    await fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
+  async function loadApplications() {
+    const res = await fetch(STORAGE.url, {
+      headers: { 'X-Mantle-Key': STORAGE.key }
     });
-
-    // Opaque response — request was sent; treat as delivered.
-    return { ok: true };
+    if (!res.ok) throw new Error('load failed');
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   }
 
-  async function sendViaWeb3Forms(payload) {
-    const key = (PROFILE.web3formsKey || '').trim();
-    if (!key) return { ok: false, skipped: true };
-
-    const res = await fetch('https://api.web3forms.com/submit', {
+  async function saveApplications(list) {
+    const res = await fetch(STORAGE.url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Accept: 'application/json'
+        'X-Mantle-Key': STORAGE.key
       },
-      body: JSON.stringify({
-        access_key: key,
-        subject: `Заявка на побачення: ${payload.instagram}`,
-        from_name: 'DatePlanner',
-        name: payload.instagram,
-        email: PROFILE.applicationEmail || 'noreply@dateplanner.local',
-        message: applicationMessage(payload),
-        instagram: payload.instagram,
-        when: payload.when,
-        about: payload.about,
-        plan: payload.plan,
-        botcheck: ''
-      })
+      body: JSON.stringify(list)
     });
-
-    const data = await res.json().catch(() => ({}));
-    return { ok: res.ok && isSuccessFlag(data.success), data };
-  }
-
-  async function sendViaNtfy(payload) {
-    const topic = (PROFILE.ntfyTopic || '').trim();
-    if (!topic) return { ok: false, skipped: true };
-
-    const res = await fetch(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
-      method: 'POST',
-      headers: {
-        Title: `Заявка: ${payload.instagram}`,
-        Priority: 'high',
-        Tags: 'love_letter'
-      },
-      body: applicationMessage(payload)
-    });
-
-    return { ok: res.ok };
+    if (!res.ok) throw new Error('save failed');
   }
 
   async function sendApplication(payload) {
-    const results = await Promise.allSettled([
-      sendViaAppsScript(payload),
-      sendViaWeb3Forms(payload),
-      sendViaNtfy(payload)
-    ]);
-
-    const values = results.map((r) => (r.status === 'fulfilled' ? r.value : { ok: false }));
-    const delivered = values.some((v) => v && v.ok);
-
-    if (!delivered) {
-      values.forEach((v) => {
-        if (v && v.data) console.warn('Delivery:', v.data);
-      });
-    }
-
-    return delivered;
+    const list = await loadApplications();
+    list.unshift(payload);
+    await saveApplications(list.slice(0, 200));
+    return true;
   }
 
   async function handleApply(e) {
