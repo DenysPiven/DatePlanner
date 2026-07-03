@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a0a2e">
+  <meta name="description" content="Ukrainian date planner questionnaire with swipes, map, and Telegram message export">
+  <title>Vechir — date planner</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header" id="header">
+      <div class="header__brand" id="brand">✨ Vechir</div>
+      <div class="header__progress">
+        <div class="header__progress-bar" id="progressBar"></div>
+      </div>
+      <div class="header__step" id="stepLabel"></div>
+    </header>
+
+    <main class="main" id="main">
+      <section class="step step--active" data-step="0">
+        <div class="welcome">
+          <div class="welcome__icon">💫</div>
+          <h1 class="welcome__title" id="welcomeTitle"></h1>
+          <p class="welcome__text" id="welcomeText"></p>
+          <ul class="welcome__features" id="welcomeFeatures"></ul>
+          <button class="btn btn--primary btn--large" data-action="next" id="startBtn"></button>
+        </div>
+      </section>
+
+      <section class="step" data-step="1">
+        <h2 class="step__title" id="aboutTitle"></h2>
+        <p class="step__subtitle" id="aboutSub"></p>
+        <form class="form" id="infoForm">
+          <label class="field">
+            <span class="field__label" id="labelUserName"></span>
+            <input class="field__input" type="text" name="userName" placeholder="Олексій" required autocomplete="given-name">
+          </label>
+          <label class="field">
+            <span class="field__label" id="labelPartnerName"></span>
+            <input class="field__input" type="text" name="partnerName" placeholder="Марія" required>
+          </label>
+          <label class="field">
+            <span class="field__label" id="labelInstagram"></span>
+            <input class="field__input" type="text" name="instagram" placeholder="@maria_art" inputmode="text">
+          </label>
+          <label class="field">
+            <span class="field__label" id="labelTelegram"></span>
+            <input class="field__input" type="text" name="telegram" placeholder="@maria" inputmode="text">
+          </label>
+          <label class="field">
+            <span class="field__label" id="labelCity"></span>
+            <select class="field__input field__select" name="city" id="citySelect" required></select>
+          </label>
+          <button class="btn btn--primary btn--large" type="submit" id="infoNextBtn"></button>
+        </form>
+      </section>
+
+      <section class="step" data-step="2">
+        <h2 class="step__title" id="foodTitle"></h2>
+        <p class="step__subtitle" id="foodSub"></p>
+        <div class="swipe" id="foodSwipe"></div>
+        <div class="swipe__actions">
+          <button class="swipe__btn swipe__btn--no" data-swipe="left" aria-label="No">✕</button>
+          <button class="swipe__btn swipe__btn--yes" data-swipe="right" aria-label="Yes">♥</button>
+        </div>
+        <p class="swipe__counter" id="foodCounter"></p>
+      </section>
+
+      <section class="step" data-step="3">
+        <h2 class="step__title" id="activityTitle"></h2>
+        <p class="step__subtitle" id="activitySub"></p>
+        <div class="swipe" id="activitySwipe"></div>
+        <div class="swipe__actions">
+          <button class="swipe__btn swipe__btn--no" data-swipe="left" aria-label="No">✕</button>
+          <button class="swipe__btn swipe__btn--yes" data-swipe="right" aria-label="Yes">♥</button>
+        </div>
+        <p class="swipe__counter" id="activityCounter"></p>
+      </section>
+
+      <section class="step" data-step="4">
+        <h2 class="step__title" id="vibeTitle"></h2>
+        <p class="step__subtitle" id="vibeSub"></p>
+        <div class="swipe" id="vibeSwipe"></div>
+        <div class="swipe__actions">
+          <button class="swipe__btn swipe__btn--no" data-swipe="left" aria-label="No">✕</button>
+          <button class="swipe__btn swipe__btn--yes" data-swipe="right" aria-label="Yes">♥</button>
+        </div>
+        <p class="swipe__counter" id="vibeCounter"></p>
+      </section>
+
+      <section class="step" data-step="5">
+        <h2 class="step__title" id="whenTitle"></h2>
+        <p class="step__subtitle" id="whenSub"></p>
+        <form class="form" id="datetimeForm">
+          <label class="field">
+            <span class="field__label" id="labelDate"></span>
+            <input class="field__input" type="date" name="date" id="dateInput" required>
+          </label>
+          <label class="field">
+            <span class="field__label" id="labelTime"></span>
+            <input class="field__input" type="time" name="time" id="timeInput" value="19:00" required>
+          </label>
+          <div class="chips" id="timeChips">
+            <button type="button" class="chip" data-time="17:00">17:00</button>
+            <button type="button" class="chip" data-time="18:00">18:00</button>
+            <button type="button" class="chip" data-time="19:00">19:00</button>
+            <button type="button" class="chip" data-time="20:00">20:00</button>
+          </div>
+          <button class="btn btn--primary btn--large" type="submit" id="datetimeNextBtn"></button>
+        </form>
+      </section>
+
+      <section class="step" data-step="6">
+        <h2 class="step__title" id="whereTitle"></h2>
+        <p class="step__subtitle" id="whereSub"></p>
+        <div class="places">
+          <div class="places__list" id="placesList"></div>
+          <div class="places__map" id="map"></div>
+        </div>
+        <button class="btn btn--primary btn--large" id="placeNextBtn" disabled data-action="next"></button>
+      </section>
+
+      <section class="step" data-step="7">
+        <div class="summary">
+          <div class="summary__icon">🎉</div>
+          <h2 class="step__title" id="planReadyTitle"></h2>
+          <p class="step__subtitle" id="summarySubtitle"></p>
+          <div class="summary__card" id="summaryCard"></div>
+          <label class="field">
+            <span class="field__label" id="messageLabel"></span>
+            <textarea class="field__textarea" id="messageText" rows="10" readonly></textarea>
+          </label>
+          <div class="summary__actions">
+            <button class="btn btn--primary btn--large" id="copyBtn"></button>
+            <button class="btn btn--secondary btn--large" id="telegramBtn"></button>
+            <button class="btn btn--ghost" id="restartBtn"></button>
+          </div>
+          <p class="summary__hint" id="copyHint"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
