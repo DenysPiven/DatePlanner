@@ -38,14 +38,19 @@
       </header>
 
       <main class="inbox-main">
+        <div class="inbox-tabs" role="tablist">
+          <button type="button" class="inbox-tab inbox-tab--active" data-folder="active" id="tabActive">Вхідні</button>
+          <button type="button" class="inbox-tab" data-folder="trash" id="tabTrash">Корзина</button>
+        </div>
         <p class="inbox-status" id="status">Завантаження…</p>
         <div class="inbox-list" id="list"></div>
       </main>
     </div>
   </div>
 
-  <script src="js/config.js?v=11"></script>
-  <script src="js/crypto.js?v=11"></script>
-  <script src="js/inbox.js?v=13"></script>
+  <script src="js/config.js?v=14"></script>
+  <script src="js/crypto.js?v=14"></script>
+  <script src="js/storage.js?v=14"></script>
+  <script src="js/inbox.js?v=14"></script>
 </body>
 </html>

@@ -12,8 +12,12 @@
   const statusEl = document.getElementById('status');
   const refreshBtn = document.getElementById('refreshBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+  const tabActive = document.getElementById('tabActive');
+  const tabTrash = document.getElementById('tabTrash');
 
   let privateKey = null;
+  let folder = 'active'; // 'active' | 'trash'
+  let counts = { active: 0, trash: 0 };
 
   function getSessionPassword() {
     try {
@@ -163,8 +167,20 @@
       </details>`;
   }
 
+  function updateTabs() {
+    tabActive.classList.toggle('inbox-tab--active', folder === 'active');
+    tabTrash.classList.toggle('inbox-tab--active', folder === 'trash');
+    tabActive.textContent = counts.active ? `Вхідні (${counts.active})` : 'Вхідні';
+    tabTrash.textContent = counts.trash ? `Корзина (${counts.trash})` : 'Корзина';
+  }
+
   function cardHtml(app, number) {
     const device = app.device;
+    const action =
+      folder === 'active'
+        ? `<button type="button" class="btn btn--ghost inbox-card__action" data-action="trash" data-id="${escapeHtml(app._id)}">У корзину</button>`
+        : `<button type="button" class="btn btn--primary inbox-card__action" data-action="restore" data-id="${escapeHtml(app._id)}">Відновити</button>`;
+
     return `
       <article class="inbox-card">
         <div class="inbox-card__top">
@@ -180,9 +196,27 @@
         <div class="inbox-card__row"><span>План</span><div class="inbox-card__value">${escapeHtml(app.plan || '—')}</div></div>
         <div class="inbox-card__row"><span>Пристрій</span><div class="inbox-card__value">${escapeHtml(deviceSummary(device))}</div></div>
         ${deviceExtraHtml(device)}
-        <div class="inbox-card__meta">#${number}</div>
+        <div class="inbox-card__footer">
+          <div class="inbox-card__meta">#${number}</div>
+          ${action}
+        </div>
       </article>
     `;
+  }
+
+  async function decryptList(sealed) {
+    const apps = [];
+    for (const item of sealed) {
+      if (!item || item.v !== 1 || !item.id) continue;
+      try {
+        const app = await AppCrypto.decryptApplication(privateKey, item);
+        app._id = item.id;
+        apps.push(app);
+      } catch {
+        /* skip corrupt */
+      }
+    }
+    return apps;
   }
 
   async function load() {
@@ -193,36 +227,50 @@
     try {
       if (!privateKey) throw new Error('locked');
 
-      const res = await fetch(STORAGE.url, {
-        headers: { 'X-Mantle-Key': STORAGE.key },
-        cache: 'no-store'
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const store = await AppStorage.loadStore();
+      counts = { active: store.active.length, trash: store.trash.length };
+      updateTabs();
 
-      const data = await res.json();
-      const sealed = Array.isArray(data) ? data.filter((item) => item && item.v === 1) : [];
-
-      const apps = [];
-      for (const item of sealed) {
-        try {
-          apps.push(await AppCrypto.decryptApplication(privateKey, item));
-        } catch {
-          /* skip corrupt / foreign items */
-        }
-      }
+      const sealed = folder === 'trash' ? store.trash : store.active;
+      const apps = await decryptList(sealed);
 
       if (!apps.length) {
-        statusEl.textContent = 'Поки немає заявок';
+        statusEl.textContent =
+          folder === 'trash' ? 'Корзина порожня' : 'Поки немає заявок';
         return;
       }
 
-      statusEl.textContent = `Всього: ${apps.length}`;
-      // Newest first in the list; numbers go oldest → newest (#1 is first received)
-      listEl.innerHTML = apps.map((app, index) => cardHtml(app, apps.length - index)).join('');
+      statusEl.textContent =
+        folder === 'trash'
+          ? `У корзині: ${apps.length}`
+          : `Вхідні: ${apps.length}`;
+
+      listEl.innerHTML = apps
+        .map((app, index) => cardHtml(app, apps.length - index))
+        .join('');
     } catch {
       statusEl.textContent = 'Не вдалось завантажити. Онови сторінку.';
     } finally {
       refreshBtn.disabled = false;
+    }
+  }
+
+  async function onListClick(e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    if (!id) return;
+
+    btn.disabled = true;
+    try {
+      if (action === 'trash') await AppStorage.moveToTrash(id);
+      if (action === 'restore') await AppStorage.restoreFromTrash(id);
+      await load();
+    } catch {
+      btn.disabled = false;
+      statusEl.textContent = 'Не вдалось виконати дію. Спробуй ще раз.';
     }
   }
 
@@ -277,6 +325,12 @@
     }
   }
 
+  function setFolder(next) {
+    folder = next;
+    updateTabs();
+    load();
+  }
+
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     tryLogin(passwordInput.value);
@@ -288,6 +342,9 @@
   });
 
   refreshBtn.addEventListener('click', load);
+  listEl.addEventListener('click', onListClick);
+  tabActive.addEventListener('click', () => setFolder('active'));
+  tabTrash.addEventListener('click', () => setFolder('trash'));
 
   console.log(
     '%cСюди не дивись 👀\nТут тільки для адміна.\nЗа цікавість ніс відірвуть.\nВсе одно нічого тут не знайдеш.',

@@ -557,35 +557,9 @@
     };
   }
 
-  async function loadApplications() {
-    const res = await fetch(STORAGE.url, {
-      headers: { 'X-Mantle-Key': STORAGE.key },
-      cache: 'no-store'
-    });
-    if (!res.ok) throw new Error('load failed');
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  }
-
-  async function saveApplications(list) {
-    const res = await fetch(STORAGE.url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Mantle-Key': STORAGE.key
-      },
-      body: JSON.stringify(list)
-    });
-    if (!res.ok) throw new Error('save failed');
-  }
-
   async function sendApplication(payload) {
     const encrypted = await AppCrypto.encryptApplication(payload);
-    const list = await loadApplications();
-    // Keep only encrypted items (v:1); drop any legacy plaintext rows
-    const sealed = list.filter((item) => item && item.v === 1);
-    sealed.unshift(encrypted);
-    await saveApplications(sealed.slice(0, 200));
+    await AppStorage.addSealed(encrypted);
     return true;
   }
 

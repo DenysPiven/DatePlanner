@@ -47,6 +47,49 @@
   padding: 16px 20px 32px;
 }
 
+.inbox-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.inbox-tab {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inbox-tab--active {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--accent), #ff8fab);
+}
+
+.inbox-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.inbox-card__footer .inbox-card__meta {
+  margin-top: 0;
+}
+
+.inbox-card__action {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+}
+
 .inbox-status {
   color: var(--text-muted);
   font-size: 0.9rem;
