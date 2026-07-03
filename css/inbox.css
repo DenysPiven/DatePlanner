@@ -3,6 +3,30 @@
   min-height: 100%;
 }
 
+.inbox-login {
+  padding: 48px 20px 32px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.inbox-login__title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.inbox-login__sub {
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.inbox-login__error {
+  color: var(--no);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: -4px 0 8px;
+}
+
 .inbox-app .header {
   display: flex;
   align-items: center;

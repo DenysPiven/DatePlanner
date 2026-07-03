@@ -13,17 +13,33 @@
 </head>
 <body>
   <div class="app inbox-app">
-    <header class="header">
-      <div class="header__brand">Заявки</div>
-      <div class="inbox-toolbar">
-        <button type="button" class="btn btn--primary" id="refreshBtn">Оновити</button>
-      </div>
-    </header>
+    <section class="inbox-login" id="loginScreen">
+      <h1 class="inbox-login__title">Заявки</h1>
+      <p class="inbox-login__sub">Введи пароль</p>
+      <form class="form" id="loginForm">
+        <label class="field">
+          <span class="field__label">Пароль</span>
+          <input class="field__input" type="password" id="passwordInput" autocomplete="current-password" required>
+        </label>
+        <p class="inbox-login__error" id="loginError" hidden>Невірний пароль</p>
+        <button class="btn btn--primary btn--large" type="submit">Увійти</button>
+      </form>
+    </section>
 
-    <main class="inbox-main">
-      <p class="inbox-status" id="status">Завантаження…</p>
-      <div class="inbox-list" id="list"></div>
-    </main>
+    <div id="inboxScreen" hidden>
+      <header class="header">
+        <div class="header__brand">Заявки</div>
+        <div class="inbox-toolbar">
+          <button type="button" class="btn btn--ghost" id="logoutBtn">Вийти</button>
+          <button type="button" class="btn btn--primary" id="refreshBtn">Оновити</button>
+        </div>
+      </header>
+
+      <main class="inbox-main">
+        <p class="inbox-status" id="status">Завантаження…</p>
+        <div class="inbox-list" id="list"></div>
+      </main>
+    </div>
   </div>
 
   <script src="js/config.js"></script>

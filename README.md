@@ -12,7 +12,7 @@ Every application is saved to online storage.
 
 https://denyspiven.github.io/DatePlanner/inbox.html
 
-No email, no Telegram, no setup — just open and refresh.
+Password is set in `js/config.js` → `INBOX_PASSWORD`.
 
 ## Local dev
 

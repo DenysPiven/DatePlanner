@@ -320,75 +320,38 @@
   }
 
   async function loadApplications() {
-    console.log('[DatePlanner] LOAD start', STORAGE.url);
     const res = await fetch(STORAGE.url, {
       headers: { 'X-Mantle-Key': STORAGE.key },
       cache: 'no-store'
     });
-    const text = await res.text();
-    console.log('[DatePlanner] LOAD response', {
-      status: res.status,
-      ok: res.ok,
-      body: text.slice(0, 500)
-    });
-    if (!res.ok) throw new Error('load failed: HTTP ' + res.status + ' ' + text);
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (err) {
-      console.error('[DatePlanner] LOAD JSON parse error', err);
-      throw err;
-    }
-    const list = Array.isArray(data) ? data : [];
-    console.log('[DatePlanner] LOAD ok, count=', list.length);
-    return list;
+    if (!res.ok) throw new Error('load failed');
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   }
 
   async function saveApplications(list) {
-    const body = JSON.stringify(list);
-    console.log('[DatePlanner] SAVE start', { count: list.length, bytes: body.length });
     const res = await fetch(STORAGE.url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Mantle-Key': STORAGE.key
       },
-      body
+      body: JSON.stringify(list)
     });
-    const text = await res.text();
-    console.log('[DatePlanner] SAVE response', {
-      status: res.status,
-      ok: res.ok,
-      body: text.slice(0, 500)
-    });
-    if (!res.ok) throw new Error('save failed: HTTP ' + res.status + ' ' + text);
+    if (!res.ok) throw new Error('save failed');
   }
 
   async function sendApplication(payload) {
-    console.log('[DatePlanner] SEND payload', payload);
     const list = await loadApplications();
     list.unshift(payload);
-    const next = list.slice(0, 200);
-    console.log('[DatePlanner] SEND writing list, count=', next.length);
-    await saveApplications(next);
-    console.log('[DatePlanner] SEND done');
+    await saveApplications(list.slice(0, 200));
     return true;
   }
 
   async function handleApply(e) {
     e.preventDefault();
-    console.log('[DatePlanner] SUBMIT click');
-    console.log('[DatePlanner] STORAGE', STORAGE);
-    console.log('[DatePlanner] state', {
-      datetime: state.datetime,
-      answers: state.answers,
-      instagramInput: $('#instagramInput').value
-    });
-
     const handle = normalizeInstagram($('#instagramInput').value);
-    console.log('[DatePlanner] instagram normalized=', handle);
     if (!handle) {
-      console.warn('[DatePlanner] empty instagram — abort');
       showToast(UI.toastInstagram);
       return;
     }
@@ -399,19 +362,12 @@
     btn.textContent = UI.submitting;
 
     try {
-      const payload = buildApplicationPayload();
-      console.log('[DatePlanner] built payload', payload);
-      const ok = await sendApplication(payload);
-      console.log('[DatePlanner] sendApplication result=', ok);
+      const ok = await sendApplication(buildApplicationPayload());
       if (!ok) throw new Error('send failed');
       showToast(UI.toastSent);
       state.screenIndex = TOTAL_SCREENS - 1;
       showScreen('done');
-      console.log('[DatePlanner] success → done screen');
-    } catch (err) {
-      console.error('[DatePlanner] SUBMIT ERROR', err);
-      console.error('[DatePlanner] error message=', err && err.message);
-      console.error('[DatePlanner] error stack=', err && err.stack);
+    } catch {
       showToast(UI.toastError);
       btn.disabled = false;
       btn.textContent = UI.submit;
@@ -452,11 +408,6 @@
   }
 
   function init() {
-    console.log('[DatePlanner] init', {
-      profile: PROFILE.name,
-      storageUrl: STORAGE && STORAGE.url,
-      hasStorageKey: !!(STORAGE && STORAGE.key)
-    });
     document.title = `${PROFILE.name} · ${PROFILE.city}`;
     applyLocale();
     renderIntro();

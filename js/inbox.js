@@ -1,9 +1,35 @@
 (function () {
   'use strict';
 
+  const SESSION_KEY = 'dateplanner_inbox_ok';
+
+  const loginScreen = document.getElementById('loginScreen');
+  const inboxScreen = document.getElementById('inboxScreen');
+  const loginForm = document.getElementById('loginForm');
+  const passwordInput = document.getElementById('passwordInput');
+  const loginError = document.getElementById('loginError');
   const listEl = document.getElementById('list');
   const statusEl = document.getElementById('status');
   const refreshBtn = document.getElementById('refreshBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  function isAuthed() {
+    return sessionStorage.getItem(SESSION_KEY) === '1';
+  }
+
+  function showLogin() {
+    loginScreen.hidden = false;
+    inboxScreen.hidden = true;
+    loginError.hidden = true;
+    passwordInput.value = '';
+    setTimeout(() => passwordInput.focus(), 50);
+  }
+
+  function showInbox() {
+    loginScreen.hidden = true;
+    inboxScreen.hidden = false;
+    load();
+  }
 
   function formatWhen(iso) {
     if (!iso) return '';
@@ -58,14 +84,33 @@
 
       statusEl.textContent = `Всього: ${apps.length}`;
       listEl.innerHTML = apps.map(cardHtml).join('');
-    } catch (err) {
-      console.error(err);
+    } catch {
       statusEl.textContent = 'Не вдалось завантажити. Онови сторінку.';
     } finally {
       refreshBtn.disabled = false;
     }
   }
 
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const value = passwordInput.value;
+    if (value === INBOX_PASSWORD) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      showInbox();
+      return;
+    }
+    loginError.hidden = false;
+    passwordInput.value = '';
+    passwordInput.focus();
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    showLogin();
+  });
+
   refreshBtn.addEventListener('click', load);
-  load();
+
+  if (isAuthed()) showInbox();
+  else showLogin();
 })();
