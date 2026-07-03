@@ -41,6 +41,7 @@
     loginScreen.style.display = '';
     inboxScreen.style.display = 'none';
     loginError.hidden = true;
+    loginError.textContent = 'Невірний пароль';
     passwordInput.value = '';
   }
 
@@ -111,25 +112,16 @@
   }
 
   function tryLogin(raw) {
-    console.log('[Inbox] tryLogin');
-    console.log('[Inbox] INBOX_PASSWORD typeof=', typeof INBOX_PASSWORD, 'raw=', INBOX_PASSWORD);
-    console.log('[Inbox] input typeof=', typeof raw, 'raw=', JSON.stringify(raw));
-    console.log('[Inbox] input charCodes=', Array.from(String(raw || '')).map((c) => c.charCodeAt(0)));
-
     if (typeof INBOX_PASSWORD === 'undefined') {
-      console.error('[Inbox] INBOX_PASSWORD is undefined — config.js not loaded?');
       loginError.hidden = false;
-      loginError.textContent = 'Помилка конфігу (див. консоль)';
+      loginError.textContent = 'Помилка конфігу';
       return false;
     }
 
     const expected = normalizePass(INBOX_PASSWORD);
     const got = normalizePass(raw);
-    console.log('[Inbox] expected=', JSON.stringify(expected), 'got=', JSON.stringify(got));
-    console.log('[Inbox] match=', got === expected);
 
     if (!expected || got !== expected) {
-      console.warn('[Inbox] password mismatch');
       loginError.hidden = false;
       loginError.textContent = 'Невірний пароль';
       passwordInput.value = '';
@@ -137,7 +129,6 @@
       return false;
     }
 
-    console.log('[Inbox] password ok → show inbox');
     setAuthed(true);
     showInbox();
     return true;
@@ -145,7 +136,6 @@
 
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    console.log('[Inbox] form submit');
     tryLogin(passwordInput.value);
   });
 
@@ -155,14 +145,6 @@
   });
 
   refreshBtn.addEventListener('click', load);
-
-  // Start: hide inbox until auth
-  console.log('[Inbox] init', {
-    hasPasswordConst: typeof INBOX_PASSWORD !== 'undefined',
-    passwordValue: typeof INBOX_PASSWORD !== 'undefined' ? INBOX_PASSWORD : null,
-    hasStorage: typeof STORAGE !== 'undefined',
-    authed: isAuthed()
-  });
 
   inboxScreen.style.display = 'none';
 
