@@ -2,7 +2,7 @@
  * Date questionnaire tree (Ukrainian UI).
  *
  * Order (why):
- * 1. About him — she filters vibe before logistics
+ * 1. About her — he filters vibe before logistics
  * 2. Duration — early; some want 30–60 min, some 4h+
  * 3. Talk topics — what happens when they sit down
  * 4. Venue — cafe / restaurant / pizza / sushi
@@ -11,34 +11,34 @@
  * 7. When — only after the plan shape is clear
  * 8. Instagram
  *
- * Options with recommended: true are her preferred answers (highlighted).
+ * Options with recommended: true are his preferred answers (highlighted).
  */
 
 const QUESTIONS = {
-  /* —— About him (multi: checkboxes + Next) —— */
+  /* —— About her (multi: checkboxes + Next) —— */
   lifestyle: {
     id: 'lifestyle',
     multi: true,
     next: 'energy',
-    title: 'Який ти більше?',
+    title: 'Яка ти більше?',
     sub: 'Можна кілька варіантів',
     options: [
       {
         id: 'home',
-        title: 'Домашній',
+        title: 'Домашня',
         desc: 'Кіно, серіали, спокій вдома',
         photo: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=900&q=80'
       },
       {
         id: 'city',
-        title: 'Міський',
+        title: 'Міська',
         desc: 'Кавʼярні, прогулянки, тусовки в місті',
         photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Vinnytsia_in_Night.jpg/960px-Vinnytsia_in_Night.jpg',
         recommended: true
       },
       {
         id: 'travel',
-        title: 'Мандрівник',
+        title: 'Мандрівниця',
         desc: 'Поїздки, нові місця, спонтанність',
         photo: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900&q=80',
         recommended: true
