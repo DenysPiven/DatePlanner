@@ -12,7 +12,10 @@ Every application is saved to online storage.
 
 https://denyspiven.github.io/DatePlanner/inbox.html
 
-Password: `vechir` (change in `js/config.js` → `INBOX_PASSWORD`).
+Inbox password is **not** stored in plaintext. Applications are encrypted;
+opening `config.js` in Network only shows hashes/keys, not the password or readable applications.
+
+To change the password, regenerate `INBOX_AUTH` in `js/config.js` (ask the agent).
 
 ## Local dev
 

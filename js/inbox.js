@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const SESSION_KEY = 'dateplanner_inbox_ok';
+  const SESSION_KEY = 'dateplanner_inbox_session';
 
   const loginScreen = document.getElementById('loginScreen');
   const inboxScreen = document.getElementById('inboxScreen');
@@ -13,31 +13,27 @@
   const refreshBtn = document.getElementById('refreshBtn');
   const logoutBtn = document.getElementById('logoutBtn');
 
-  function normalizePass(value) {
-    return String(value || '')
-      .trim()
-      .replace(/\s+/g, '')
-      .toLowerCase();
-  }
+  let privateKey = null;
 
-  function isAuthed() {
+  function getSessionPassword() {
     try {
-      return sessionStorage.getItem(SESSION_KEY) === '1';
+      return sessionStorage.getItem(SESSION_KEY) || '';
     } catch {
-      return false;
+      return '';
     }
   }
 
-  function setAuthed(on) {
+  function setSessionPassword(password) {
     try {
-      if (on) sessionStorage.setItem(SESSION_KEY, '1');
+      if (password) sessionStorage.setItem(SESSION_KEY, password);
       else sessionStorage.removeItem(SESSION_KEY);
     } catch {
-      /* private mode — ignore */
+      /* private mode */
     }
   }
 
   function showLogin() {
+    privateKey = null;
     loginScreen.style.display = '';
     inboxScreen.style.display = 'none';
     loginError.hidden = true;
@@ -90,6 +86,8 @@
     refreshBtn.disabled = true;
 
     try {
+      if (!privateKey) throw new Error('locked');
+
       const res = await fetch(STORAGE.url, {
         headers: { 'X-Mantle-Key': STORAGE.key },
         cache: 'no-store'
@@ -97,7 +95,16 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
 
       const data = await res.json();
-      const apps = Array.isArray(data) ? data : [];
+      const sealed = Array.isArray(data) ? data.filter((item) => item && item.v === 1) : [];
+
+      const apps = [];
+      for (const item of sealed) {
+        try {
+          apps.push(await AppCrypto.decryptApplication(privateKey, item));
+        } catch {
+          /* skip corrupt / foreign items */
+        }
+      }
 
       if (!apps.length) {
         statusEl.textContent = 'Поки немає заявок';
@@ -113,17 +120,17 @@
     }
   }
 
-  function tryLogin(raw) {
-    if (typeof INBOX_PASSWORD === 'undefined') {
+  async function tryLogin(raw) {
+    loginError.hidden = true;
+
+    if (typeof INBOX_AUTH === 'undefined' || typeof AppCrypto === 'undefined') {
       loginError.hidden = false;
       loginError.textContent = 'Помилка конфігу';
       return false;
     }
 
-    const expected = normalizePass(INBOX_PASSWORD);
-    const got = normalizePass(raw);
-
-    if (!expected || got !== expected) {
+    const okHash = await AppCrypto.verifyPassword(raw);
+    if (!okHash) {
       loginError.hidden = false;
       loginError.textContent = 'Невірний пароль';
       passwordInput.value = '';
@@ -131,9 +138,37 @@
       return false;
     }
 
-    setAuthed(true);
+    try {
+      privateKey = await AppCrypto.unlockPrivateKey(raw);
+    } catch {
+      loginError.hidden = false;
+      loginError.textContent = 'Невірний пароль';
+      passwordInput.value = '';
+      passwordInput.focus();
+      return false;
+    }
+
+    setSessionPassword(AppCrypto.normalizePass(raw));
     showInbox();
     return true;
+  }
+
+  async function resumeSession() {
+    const saved = getSessionPassword();
+    if (!saved) return false;
+    try {
+      const okHash = await AppCrypto.verifyPassword(saved);
+      if (!okHash) {
+        setSessionPassword('');
+        return false;
+      }
+      privateKey = await AppCrypto.unlockPrivateKey(saved);
+      showInbox();
+      return true;
+    } catch {
+      setSessionPassword('');
+      return false;
+    }
   }
 
   loginForm.addEventListener('submit', (e) => {
@@ -142,7 +177,7 @@
   });
 
   logoutBtn.addEventListener('click', () => {
-    setAuthed(false);
+    setSessionPassword('');
     showLogin();
   });
 
@@ -155,6 +190,7 @@
 
   inboxScreen.style.display = 'none';
 
-  if (isAuthed()) showInbox();
-  else showLogin();
+  resumeSession().then((ok) => {
+    if (!ok) showLogin();
+  });
 })();

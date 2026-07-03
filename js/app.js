@@ -524,9 +524,12 @@
   }
 
   async function sendApplication(payload) {
+    const encrypted = await AppCrypto.encryptApplication(payload);
     const list = await loadApplications();
-    list.unshift(payload);
-    await saveApplications(list.slice(0, 200));
+    // Keep only encrypted items (v:1); drop any legacy plaintext rows
+    const sealed = list.filter((item) => item && item.v === 1);
+    sealed.unshift(encrypted);
+    await saveApplications(sealed.slice(0, 200));
     return true;
   }
 
