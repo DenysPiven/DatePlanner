@@ -19,10 +19,19 @@ Live: https://denyspiven.github.io/DatePlanner/
 
 Options with `recommended: true` show a **«мені заходить»** badge (her preferences). Edit in `js/data.js`.
 
+## Where applications go
+
+To **`PROFILE.applicationEmail`** in `js/config.js` (email via [FormSubmit](https://formsubmit.co)).
+
+1. Set your email in `applicationEmail`
+2. Submit one test application
+3. Open the **Confirm your email** letter from FormSubmit and confirm once
+4. After that, every application arrives in that inbox (subject: `Заявка на побачення: @instagram`)
+
 ## Customize
 
-- `js/config.js` — name, photos, bio, `applicationEmail`
-- `js/data.js` — questions, branches, recommended flags
+- `js/config.js` — name, photos, bio, **`applicationEmail`**
+- `js/data.js` — questions (`multi: true` = checkboxes + Next; otherwise tap one option)
 
 ## Local dev
 

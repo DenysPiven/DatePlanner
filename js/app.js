@@ -32,6 +32,7 @@
     $('#labelDate').textContent = UI.date;
     $('#labelTime').textContent = UI.time;
     $('#datetimeNextBtn').textContent = UI.next;
+    $('#multiNextBtn').textContent = UI.next;
     $('#applyTitle').textContent = UI.applyTitle;
     $('#applySub').textContent = UI.applySub;
     $('#labelInstagram').textContent = UI.instagram;
@@ -139,10 +140,15 @@
     $('#questionSub').textContent = q.sub;
 
     const list = $('#choiceList');
-    const isPair = q.options.length === 2;
+    const nextBtn = $('#multiNextBtn');
+    const isMulti = !!q.multi;
+    const isPair = !isMulti && q.options.length === 2;
 
     list.innerHTML = '';
     list.className = isPair ? 'choice choice--pair' : 'choice choice--grid';
+    if (isMulti) list.classList.add('choice--multi');
+
+    const selected = new Set();
 
     q.options.forEach((opt, i) => {
       if (isPair && i === 1) {
@@ -155,22 +161,56 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'choice__card' + (opt.recommended ? ' choice__card--recommended' : '');
+      btn.dataset.id = opt.id;
       btn.innerHTML = `
         ${opt.recommended ? `<span class="choice__badge">${UI.recommended}</span>` : ''}
+        ${isMulti ? '<span class="choice__check" aria-hidden="true"></span>' : ''}
         <div class="choice__photo" style="background-image:url('${opt.photo}')"></div>
         <div class="choice__body">
           <div class="choice__title">${opt.title}</div>
           <div class="choice__desc">${opt.desc}</div>
         </div>
       `;
-      btn.addEventListener('click', () => pickOption(q, opt, btn));
+
+      if (isMulti) {
+        btn.addEventListener('click', () => {
+          if (selected.has(opt.id)) {
+            selected.delete(opt.id);
+            btn.classList.remove('choice__card--checked');
+          } else {
+            selected.add(opt.id);
+            btn.classList.add('choice__card--checked');
+          }
+          nextBtn.disabled = selected.size === 0;
+        });
+      } else {
+        btn.addEventListener('click', () => pickSingle(q, opt, btn));
+      }
+
       list.appendChild(btn);
     });
+
+    if (isMulti) {
+      nextBtn.hidden = false;
+      nextBtn.disabled = true;
+      nextBtn.onclick = () => {
+        if (!selected.size) {
+          showToast(UI.pickAtLeastOne);
+          return;
+        }
+        const picks = q.options.filter((o) => selected.has(o.id));
+        state.answers[q.id] = picks;
+        goNext(q.next);
+      };
+    } else {
+      nextBtn.hidden = true;
+      nextBtn.onclick = null;
+    }
 
     showScreen('question');
   }
 
-  function pickOption(question, option, btnEl) {
+  function pickSingle(question, option, btnEl) {
     state.answers[question.id] = option;
 
     $$('#choiceList .choice__card').forEach((c) => {
@@ -190,11 +230,14 @@
   const PLAN_KEYS = ['duration', 'venue', 'drink', 'meal_style', 'after', 'place'];
   const ABOUT_KEYS = ['lifestyle', 'energy', 'topics'];
 
+  function answerTitle(value) {
+    if (!value) return '';
+    if (Array.isArray(value)) return value.map((o) => o.title).join(', ');
+    return value.title || '';
+  }
+
   function linesFromKeys(keys) {
-    return keys
-      .map((k) => state.answers[k])
-      .filter(Boolean)
-      .map((o) => o.title);
+    return keys.map((k) => answerTitle(state.answers[k])).filter(Boolean);
   }
 
   function planPhoto() {
@@ -210,7 +253,7 @@
 
     $('#previewCard').innerHTML = `
       <div class="preview-place" style="background-image:url('${planPhoto()}')">
-        <div class="preview-place__label">${(state.answers.place || state.answers.venue || {}).title || ''}</div>
+        <div class="preview-place__label">${answerTitle(state.answers.place || state.answers.venue)}</div>
       </div>
       <div class="summary__row">
         <span class="summary__row-icon">📅</span>
@@ -241,31 +284,25 @@
       when: `${state.datetime.date} ${state.datetime.time}`,
       about: linesFromKeys(ABOUT_KEYS).join(' · '),
       plan: linesFromKeys(PLAN_KEYS).join(' → '),
-      lifestyle: (state.answers.lifestyle || {}).title || '',
-      energy: (state.answers.energy || {}).title || '',
-      duration: (state.answers.duration || {}).title || '',
-      topics: (state.answers.topics || {}).title || '',
-      venue: (state.answers.venue || {}).title || '',
-      drinkOrMeal: (state.answers.drink || state.answers.meal_style || {}).title || '',
-      after: (state.answers.after || {}).title || '',
-      place: (state.answers.place || {}).title || '',
+      lifestyle: answerTitle(state.answers.lifestyle),
+      energy: answerTitle(state.answers.energy),
+      duration: answerTitle(state.answers.duration),
+      topics: answerTitle(state.answers.topics),
+      venue: answerTitle(state.answers.venue),
+      drinkOrMeal: answerTitle(state.answers.drink || state.answers.meal_style),
+      after: answerTitle(state.answers.after),
+      place: answerTitle(state.answers.place),
       city: PROFILE.city,
       submittedAt: new Date().toISOString()
     };
   }
 
-  function saveLocal(payload) {
-    const key = 'vechir_applications';
-    const list = JSON.parse(localStorage.getItem(key) || '[]');
-    list.unshift(payload);
-    localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
-  }
-
   async function sendApplication(payload) {
-    saveLocal(payload);
-
     const email = (PROFILE.applicationEmail || '').trim();
-    if (!email) return true;
+    if (!email) {
+      console.warn('PROFILE.applicationEmail is empty — applications are not delivered.');
+      return false;
+    }
 
     const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
       method: 'POST',
@@ -274,7 +311,9 @@
         Accept: 'application/json'
       },
       body: JSON.stringify({
-        _subject: `Заявка: ${payload.instagram}`,
+        _subject: `Заявка на побачення: ${payload.instagram}`,
+        _template: 'table',
+        _captcha: 'false',
         instagram: payload.instagram,
         when: payload.when,
         about: payload.about,
@@ -292,7 +331,9 @@
       })
     });
 
-    return res.ok;
+    if (!res.ok) return false;
+    const data = await res.json().catch(() => ({}));
+    return data.success !== false;
   }
 
   async function handleApply(e) {

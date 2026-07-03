@@ -15,80 +15,76 @@
  */
 
 const QUESTIONS = {
-  /* —— About him —— */
+  /* —— About him (multi: checkboxes + Next) —— */
   lifestyle: {
     id: 'lifestyle',
+    multi: true,
+    next: 'energy',
     title: 'Який ти більше?',
-    sub: 'Щоб зрозуміти, чи ми на одній хвилі',
+    sub: 'Можна кілька варіантів',
     options: [
       {
         id: 'home',
         title: 'Домашній',
         desc: 'Кіно, серіали, спокій вдома',
-        photo: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=900&q=80',
-        next: 'energy'
+        photo: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=900&q=80'
       },
       {
         id: 'city',
         title: 'Міський',
         desc: 'Кавʼярні, прогулянки, тусовки в місті',
         photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Vinnytsia_in_Night.jpg/960px-Vinnytsia_in_Night.jpg',
-        recommended: true,
-        next: 'energy'
+        recommended: true
       },
       {
         id: 'travel',
         title: 'Мандрівник',
         desc: 'Поїздки, нові місця, спонтанність',
         photo: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900&q=80',
-        recommended: true,
-        next: 'energy'
+        recommended: true
       },
       {
         id: 'mixed',
         title: 'По-різному',
         desc: 'І вдома затишно, і вийти хочеться',
         photo: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80',
-        recommended: true,
-        next: 'energy'
+        recommended: true
       }
     ]
   },
 
   energy: {
     id: 'energy',
+    multi: true,
+    next: 'duration',
     title: 'Як проводиш вільний час?',
-    sub: 'Одне найближче',
+    sub: 'Можна кілька варіантів',
     options: [
       {
         id: 'sport',
         title: 'Спорт / рух',
         desc: 'Зал, пробіжки, активність',
-        photo: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=900&q=80',
-        next: 'duration'
+        photo: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=900&q=80'
       },
       {
         id: 'creative',
         title: 'Творчість',
         desc: 'Музика, фото, щось руками',
         photo: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=900&q=80',
-        recommended: true,
-        next: 'duration'
+        recommended: true
       },
       {
         id: 'social',
         title: 'Друзі',
         desc: 'Зустрічі, розмови, компанії',
         photo: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80',
-        recommended: true,
-        next: 'duration'
+        recommended: true
       },
       {
         id: 'chill',
         title: 'Просто відпочинок',
         desc: 'Без планів, як піде',
-        photo: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900&q=80',
-        next: 'duration'
+        photo: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900&q=80'
       }
     ]
   },
@@ -132,56 +128,52 @@ const QUESTIONS = {
     ]
   },
 
-  /* —— What they talk about at the table —— */
+  /* —— What they talk about at the table (multi) —— */
   topics: {
     id: 'topics',
+    multi: true,
+    next: 'venue',
     title: 'Про що цікаво говорити?',
-    sub: 'Сядемо — і про що?',
+    sub: 'Сядемо — і про що? Можна кілька',
     options: [
       {
         id: 'life',
         title: 'Життя і плани',
         desc: 'Хто ми, куди йдемо',
         photo: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=900&q=80',
-        recommended: true,
-        next: 'venue'
+        recommended: true
       },
       {
         id: 'humor',
         title: 'Жарти і легкий вайб',
         desc: 'Сміх важливіший за серйозність',
         photo: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900&q=80',
-        recommended: true,
-        next: 'venue'
+        recommended: true
       },
       {
         id: 'travel_talk',
         title: 'Подорожі',
         desc: 'Місця, враження, мрії',
         photo: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=900&q=80',
-        recommended: true,
-        next: 'venue'
+        recommended: true
       },
       {
         id: 'movies',
         title: 'Кіно / музика / серіали',
         desc: 'Що дивимось і слухаємо',
-        photo: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=900&q=80',
-        next: 'venue'
+        photo: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=900&q=80'
       },
       {
         id: 'work',
         title: 'Робота і хобі',
         desc: 'Чим займаємось щодня',
-        photo: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=900&q=80',
-        next: 'venue'
+        photo: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=900&q=80'
       },
       {
         id: 'deep',
         title: 'Глибші теми',
         desc: 'Почуття, цінності, сенси',
-        photo: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900&q=80',
-        next: 'venue'
+        photo: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900&q=80'
       }
     ]
   },

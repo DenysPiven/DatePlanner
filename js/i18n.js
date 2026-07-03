@@ -9,6 +9,7 @@ const UI = {
   next: 'Далі',
   or: 'або',
   recommended: 'мені заходить',
+  pickAtLeastOne: 'Обери хоча б один варіант',
 
   whenTitle: 'Коли зручно?',
   whenSub: 'Обери день і час — план уже є',

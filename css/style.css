@@ -514,6 +514,58 @@ body::before {
   transform: scale(0.97);
 }
 
+.choice__card--checked {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(255, 107, 157, 0.15);
+}
+
+.choice__check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.choice__check::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 12px;
+  height: 7px;
+  border-left: 2.5px solid #fff;
+  border-bottom: 2.5px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+  opacity: 0;
+}
+
+.choice__card--checked .choice__check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.choice__card--checked .choice__check::after {
+  opacity: 1;
+}
+
+.choice__card--recommended .choice__check {
+  top: 40px;
+}
+
+.choice__next {
+  margin-top: 16px;
+}
+
+.choice__next[hidden] {
+  display: none !important;
+}
+
 .choice__photo {
   width: 100%;
   height: min(28vh, 180px);
