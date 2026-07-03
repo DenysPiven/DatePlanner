@@ -60,6 +60,10 @@
     $('#doneTitle').textContent = UI.doneTitle;
     $('#doneText').textContent = UI.doneText;
     $('#doneHint').textContent = UI.doneHint;
+    $('#doneInstagram').textContent = UI.doneInstagram;
+    $('#doneInstagram').href = `https://instagram.com/${UI.doneInstagram.replace('@', '')}`;
+    $('#matchSub').textContent = UI.matchSub;
+    $('#matchPhotoMe').style.backgroundImage = `url('${PROFILE.photos[0].src}')`;
   }
 
   function showToast(msg) {
@@ -563,6 +567,45 @@
     return true;
   }
 
+  async function tryFetchInstagramPhoto(username) {
+    const proxyUrls = [
+      `https://unavatar.io/instagram/${username}`,
+      `https://avatar-resolver.vercel.app/instagram/${username}`,
+      `https://images.weserv.nl/?url=instagram.com/${username}/&default=1`
+    ];
+    
+    for (const url of proxyUrls) {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        const loaded = await Promise.race([
+          new Promise((resolve) => {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = url;
+          }),
+          new Promise((resolve) => setTimeout(() => resolve(false), 3000))
+        ]);
+        if (loaded && img.naturalWidth > 10) {
+          return url;
+        }
+      } catch {
+        continue;
+      }
+    }
+    return null;
+  }
+
+  function showMatchScreen(herPhotoUrl) {
+    const herPhoto = $('#matchPhotoHer');
+    if (herPhotoUrl) {
+      herPhoto.style.backgroundImage = `url('${herPhotoUrl}')`;
+    } else {
+      herPhoto.innerHTML = '<span style="font-size:3rem;line-height:120px;">💜</span>';
+    }
+    showScreen('match');
+  }
+
   async function handleApply(e) {
     e.preventDefault();
     const handle = normalizeInstagram($('#instagramInput').value);
@@ -570,11 +613,6 @@
 
     if (!handle) {
       showToast(UI.toastInstagram);
-      return;
-    }
-    if (!whyMe) {
-      showToast(UI.whyMeRequired);
-      $('#whyMeInput').focus();
       return;
     }
 
@@ -587,12 +625,15 @@
     btn.textContent = UI.submitting;
 
     try {
-      const ok = await sendApplication(buildApplicationPayload());
+      const [ok, herPhoto] = await Promise.all([
+        sendApplication(buildApplicationPayload()),
+        tryFetchInstagramPhoto(handle)
+      ]);
       if (!ok) throw new Error('send failed');
       clearDraft();
       showToast(UI.toastSent);
       state.screenIndex = PROGRESS_TOTAL;
-      showScreen('done');
+      showMatchScreen(herPhoto);
     } catch {
       showToast(UI.toastError);
       btn.disabled = false;
@@ -647,6 +688,10 @@
     });
 
     $('#applyForm').addEventListener('submit', handleApply);
+
+    $('#matchContinueBtn').addEventListener('click', () => {
+      showScreen('done');
+    });
   }
 
   function init() {

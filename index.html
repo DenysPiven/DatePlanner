@@ -92,12 +92,27 @@
         </form>
       </section>
 
+      <!-- Match -->
+      <section class="step" data-screen="match">
+        <div class="match">
+          <div class="match__photos">
+            <div class="match__photo match__photo--me" id="matchPhotoMe"></div>
+            <div class="match__heart">💕</div>
+            <div class="match__photo match__photo--her" id="matchPhotoHer"></div>
+          </div>
+          <h2 class="match__title">It's a match!</h2>
+          <p class="match__sub" id="matchSub"></p>
+          <button class="btn btn--primary btn--large" id="matchContinueBtn">Далі</button>
+        </div>
+      </section>
+
       <!-- Done -->
       <section class="step" data-screen="done">
         <div class="done">
           <div class="done__icon">💌</div>
           <h2 class="step__title" id="doneTitle"></h2>
           <p class="step__subtitle" id="doneText"></p>
+          <a class="done__instagram" id="doneInstagram" href="" target="_blank"></a>
           <p class="done__hint" id="doneHint"></p>
         </div>
       </section>

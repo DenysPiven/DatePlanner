@@ -34,8 +34,12 @@ const UI = {
   submit: 'Надіслати заявку',
   submitting: 'Надсилаю…',
 
+  matchTitle: 'It\'s a match!',
+  matchSub: 'Тепер чекай повідомлення або напиши першою',
+
   doneTitle: 'Заявку надіслано',
-  doneText: 'Дякую! Я обов\'язково напишу тобі в Instagram протягом 48 годин.',
+  doneText: 'Я напишу тобі в Instagram протягом 48 годин. Або напиши мені сама:',
+  doneInstagram: '@pivden2000',
   doneHint: 'Можеш закрити сторінку',
 
   summaryWhen: 'Коли',
