@@ -61,7 +61,53 @@
     }
   }
 
+  function deviceSummary(device) {
+    if (!device || typeof device !== 'object') return '—';
+    const parts = [
+      device.uaData && device.uaData.mobile != null
+        ? (device.uaData.mobile ? '📱 mobile' : '💻 desktop')
+        : device.touchPoints > 0
+          ? '📱 touch'
+          : '💻',
+      device.uaData && device.uaData.platform ? device.uaData.platform : device.platform,
+      device.screen ? `екран ${device.screen}` : '',
+      device.viewport ? `viewport ${device.viewport}` : '',
+      device.pixelRatio ? `@${device.pixelRatio}x` : '',
+      device.language || '',
+      device.timezone || '',
+      device.connection && device.connection.type ? device.connection.type : '',
+      device.hardwareConcurrency ? `${device.hardwareConcurrency} cores` : '',
+      device.deviceMemoryGb != null ? `${device.deviceMemoryGb} GB` : '',
+      device.darkMode ? 'dark' : 'light'
+    ].filter(Boolean);
+    return parts.join(' · ');
+  }
+
+  function deviceDetails(device) {
+    if (!device || typeof device !== 'object') return '';
+    const lines = [
+      device.userAgent ? `UA: ${device.userAgent}` : '',
+      device.languages ? `Мови: ${device.languages}` : '',
+      device.vendor ? `Vendor: ${device.vendor}` : '',
+      device.connection
+        ? `Мережа: ${[
+            device.connection.type,
+            device.connection.downlink != null ? `${device.connection.downlink} Mbps` : '',
+            device.connection.rtt != null ? `rtt ${device.connection.rtt}ms` : '',
+            device.connection.saveData ? 'save-data' : ''
+          ]
+            .filter(Boolean)
+            .join(', ')}`
+        : '',
+      device.webdriver ? '⚠️ webdriver / automation' : '',
+      `online: ${device.online ? 'yes' : 'no'} · cookies: ${device.cookieEnabled ? 'yes' : 'no'}`
+    ].filter(Boolean);
+    return lines.join('\n');
+  }
+
   function cardHtml(app, index) {
+    const device = app.device;
+    const details = deviceDetails(device);
     return `
       <article class="inbox-card">
         <div class="inbox-card__top">
@@ -75,6 +121,12 @@
         <div class="inbox-card__row"><span>Про нього</span>${app.about || '—'}</div>
         <div class="inbox-card__row"><span>Фільтри</span>${app.filters || [app.smoking, app.alcohol].filter(Boolean).join(' · ') || '—'}</div>
         <div class="inbox-card__row"><span>План</span>${app.plan || '—'}</div>
+        <div class="inbox-card__row"><span>Пристрій</span>${deviceSummary(device)}</div>
+        ${
+          details
+            ? `<details class="inbox-card__device"><summary>Деталі пристрою</summary><pre>${details.replace(/</g, '&lt;')}</pre></details>`
+            : ''
+        }
         <div class="inbox-card__meta">#${index + 1}</div>
       </article>
     `;

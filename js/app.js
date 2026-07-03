@@ -478,6 +478,62 @@
     return v;
   }
 
+  /** Passive device/browser signals — no permission prompts. */
+  function collectDeviceInfo() {
+    const nav = navigator;
+    const screenObj = window.screen || {};
+    const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
+    const tz = (() => {
+      try {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      } catch {
+        return '';
+      }
+    })();
+
+    const uaData = nav.userAgentData
+      ? {
+          brands: (nav.userAgentData.brands || []).map((b) => `${b.brand} ${b.version}`).join(', '),
+          mobile: !!nav.userAgentData.mobile,
+          platform: nav.userAgentData.platform || ''
+        }
+      : null;
+
+    return {
+      userAgent: nav.userAgent || '',
+      platform: nav.platform || '',
+      language: nav.language || '',
+      languages: Array.isArray(nav.languages) ? nav.languages.join(', ') : '',
+      timezone: tz,
+      timezoneOffsetMin: new Date().getTimezoneOffset(),
+      screen: `${screenObj.width || 0}×${screenObj.height || 0}`,
+      availScreen: `${screenObj.availWidth || 0}×${screenObj.availHeight || 0}`,
+      colorDepth: screenObj.colorDepth || 0,
+      pixelRatio: window.devicePixelRatio || 1,
+      viewport: `${window.innerWidth || 0}×${window.innerHeight || 0}`,
+      touchPoints: nav.maxTouchPoints || 0,
+      hardwareConcurrency: nav.hardwareConcurrency || 0,
+      deviceMemoryGb: nav.deviceMemory || null,
+      cookieEnabled: !!nav.cookieEnabled,
+      online: !!nav.onLine,
+      pdfViewer: !!nav.pdfViewerEnabled,
+      webdriver: !!nav.webdriver,
+      vendor: nav.vendor || '',
+      darkMode: !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches),
+      reducedMotion: !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches),
+      connection: conn
+        ? {
+            type: conn.effectiveType || conn.type || '',
+            downlink: conn.downlink != null ? conn.downlink : null,
+            rtt: conn.rtt != null ? conn.rtt : null,
+            saveData: !!conn.saveData
+          }
+        : null,
+      uaData,
+      collectedAt: new Date().toISOString()
+    };
+  }
+
   function buildApplicationPayload() {
     return {
       instagram: '@' + state.instagram,
@@ -497,6 +553,7 @@
       after: answerTitle(state.answers.after),
       place: answerTitle(state.answers.place),
       city: PROFILE.city,
+      device: collectDeviceInfo(),
       submittedAt: new Date().toISOString()
     };
   }
