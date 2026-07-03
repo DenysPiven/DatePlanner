@@ -61,72 +61,126 @@
     }
   }
 
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function deviceKind(device) {
+    if (device.uaData && device.uaData.mobile != null) {
+      return device.uaData.mobile ? '📱 Телефон' : '💻 Компʼютер';
+    }
+    if (device.touchPoints > 0) return '📱 Touch';
+    return '💻 Пристрій';
+  }
+
   function deviceSummary(device) {
     if (!device || typeof device !== 'object') return '—';
-    const parts = [
-      device.uaData && device.uaData.mobile != null
-        ? (device.uaData.mobile ? '📱 mobile' : '💻 desktop')
-        : device.touchPoints > 0
-          ? '📱 touch'
-          : '💻',
-      device.uaData && device.uaData.platform ? device.uaData.platform : device.platform,
-      device.screen ? `екран ${device.screen}` : '',
-      device.viewport ? `viewport ${device.viewport}` : '',
-      device.pixelRatio ? `@${device.pixelRatio}x` : '',
-      device.language || '',
-      device.timezone || '',
-      device.connection && device.connection.type ? device.connection.type : '',
-      device.hardwareConcurrency ? `${device.hardwareConcurrency} cores` : '',
-      device.deviceMemoryGb != null ? `${device.deviceMemoryGb} GB` : '',
-      device.darkMode ? 'dark' : 'light'
-    ].filter(Boolean);
+    const platform = (device.uaData && device.uaData.platform) || device.platform || '';
+    const parts = [deviceKind(device), platform, device.timezone || ''].filter(Boolean);
     return parts.join(' · ');
   }
 
-  function deviceDetails(device) {
-    if (!device || typeof device !== 'object') return '';
-    const lines = [
-      device.userAgent ? `UA: ${device.userAgent}` : '',
-      device.languages ? `Мови: ${device.languages}` : '',
-      device.vendor ? `Vendor: ${device.vendor}` : '',
-      device.connection
-        ? `Мережа: ${[
-            device.connection.type,
-            device.connection.downlink != null ? `${device.connection.downlink} Mbps` : '',
-            device.connection.rtt != null ? `rtt ${device.connection.rtt}ms` : '',
-            device.connection.saveData ? 'save-data' : ''
-          ]
-            .filter(Boolean)
-            .join(', ')}`
-        : '',
-      device.webdriver ? '⚠️ webdriver / automation' : '',
-      `online: ${device.online ? 'yes' : 'no'} · cookies: ${device.cookieEnabled ? 'yes' : 'no'}`
-    ].filter(Boolean);
-    return lines.join('\n');
+  function deviceRows(device) {
+    if (!device || typeof device !== 'object') return [];
+
+    const network = device.connection
+      ? [
+          device.connection.type,
+          device.connection.downlink != null ? `${device.connection.downlink} Мбіт/с` : '',
+          device.connection.rtt != null ? `затримка ${device.connection.rtt} мс` : '',
+          device.connection.saveData ? 'економія трафіку' : ''
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : '';
+
+    const hardware = [
+      device.hardwareConcurrency ? `${device.hardwareConcurrency} ядер CPU` : '',
+      device.deviceMemoryGb != null ? `${device.deviceMemoryGb} ГБ RAM` : '',
+      device.touchPoints ? `touch ×${device.touchPoints}` : ''
+    ]
+      .filter(Boolean)
+      .join(' · ');
+
+    const display = [
+      device.screen ? `екран ${device.screen}` : '',
+      device.availScreen ? `доступно ${device.availScreen}` : '',
+      device.viewport ? `вікно ${device.viewport}` : '',
+      device.pixelRatio ? `щільність ${device.pixelRatio}×` : '',
+      device.colorDepth ? `${device.colorDepth}-bit` : ''
+    ]
+      .filter(Boolean)
+      .join(' · ');
+
+    const rows = [
+      ['Тип', deviceKind(device)],
+      ['Платформа', (device.uaData && device.uaData.platform) || device.platform || ''],
+      ['Залізо', hardware],
+      ['Екран', display],
+      ['Мова', device.language || ''],
+      ['Мови', device.languages || ''],
+      ['Часовий пояс', device.timezone || ''],
+      [
+        'Зсув часу',
+        device.timezoneOffsetMin != null
+          ? `UTC${device.timezoneOffsetMin <= 0 ? '+' : '-'}${Math.abs(device.timezoneOffsetMin) / 60}`
+          : ''
+      ],
+      ['Мережа', network],
+      ['Тема', device.darkMode ? 'темна' : 'світла'],
+      ['Анімації', device.reducedMotion ? 'зменшені' : 'звичайні'],
+      ['Онлайн', device.online ? 'так' : 'ні'],
+      ['Cookies', device.cookieEnabled ? 'так' : 'ні'],
+      ['PDF viewer', device.pdfViewer ? 'так' : 'ні'],
+      ['Vendor', device.vendor || ''],
+      ['Браузер (бренди)', device.uaData && device.uaData.brands ? device.uaData.brands : ''],
+      ['Автоматизація', device.webdriver ? '⚠️ так (webdriver)' : 'ні'],
+      ['User-Agent', device.userAgent || '']
+    ];
+
+    return rows.filter(([, value]) => value !== '' && value != null);
+  }
+
+  function deviceExtraHtml(device) {
+    const rows = deviceRows(device);
+    if (!rows.length) return '';
+    const body = rows
+      .map(
+        ([label, value]) => `
+        <div class="inbox-card__row inbox-card__row--extra">
+          <span>${escapeHtml(label)}</span>
+          <div class="inbox-card__value">${escapeHtml(value)}</div>
+        </div>`
+      )
+      .join('');
+    return `
+      <details class="inbox-card__device">
+        <summary>Додатково · пристрій і залізо</summary>
+        <div class="inbox-card__extra">${body}</div>
+      </details>`;
   }
 
   function cardHtml(app, index) {
     const device = app.device;
-    const details = deviceDetails(device);
     return `
       <article class="inbox-card">
         <div class="inbox-card__top">
           <a class="inbox-card__insta" href="https://instagram.com/${(app.instagram || '').replace(/^@/, '')}" target="_blank" rel="noopener">
-            ${app.instagram || '—'}
+            ${escapeHtml(app.instagram || '—')}
           </a>
           <span class="inbox-card__time">${formatWhen(app.submittedAt)}</span>
         </div>
-        <div class="inbox-card__row"><span>Коли</span>${app.when || '—'}</div>
-        <div class="inbox-card__row"><span>Про себе</span>${app.whyMe || '—'}</div>
-        <div class="inbox-card__row"><span>Про нього</span>${app.about || '—'}</div>
-        <div class="inbox-card__row"><span>Фільтри</span>${app.filters || [app.smoking, app.alcohol].filter(Boolean).join(' · ') || '—'}</div>
-        <div class="inbox-card__row"><span>План</span>${app.plan || '—'}</div>
-        <div class="inbox-card__row"><span>Пристрій</span>${deviceSummary(device)}</div>
-        ${
-          details
-            ? `<details class="inbox-card__device"><summary>Деталі пристрою</summary><pre>${details.replace(/</g, '&lt;')}</pre></details>`
-            : ''
-        }
+        <div class="inbox-card__row"><span>Коли</span><div class="inbox-card__value">${escapeHtml(app.when || '—')}</div></div>
+        <div class="inbox-card__row"><span>Про себе</span><div class="inbox-card__value">${escapeHtml(app.whyMe || '—')}</div></div>
+        <div class="inbox-card__row"><span>Про нього</span><div class="inbox-card__value">${escapeHtml(app.about || '—')}</div></div>
+        <div class="inbox-card__row"><span>Фільтри</span><div class="inbox-card__value">${escapeHtml(app.filters || [app.smoking, app.alcohol].filter(Boolean).join(' · ') || '—')}</div></div>
+        <div class="inbox-card__row"><span>План</span><div class="inbox-card__value">${escapeHtml(app.plan || '—')}</div></div>
+        <div class="inbox-card__row"><span>Пристрій</span><div class="inbox-card__value">${escapeHtml(deviceSummary(device))}</div></div>
+        ${deviceExtraHtml(device)}
         <div class="inbox-card__meta">#${index + 1}</div>
       </article>
     `;

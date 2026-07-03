@@ -90,7 +90,7 @@
 .inbox-card__row {
   font-size: 0.92rem;
   line-height: 1.45;
-  padding: 6px 0;
+  padding: 8px 0;
   border-top: 1px solid var(--border);
 }
 
@@ -101,7 +101,14 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-muted);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
+}
+
+.inbox-card__value {
+  color: var(--text);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
 }
 
 .inbox-card__meta {
@@ -111,34 +118,51 @@
 }
 
 .inbox-card__device {
-  margin-top: 10px;
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
 }
 
 .inbox-card__device summary {
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.88rem;
   color: var(--accent);
   list-style: none;
+  padding: 4px 0;
+  user-select: none;
 }
 
 .inbox-card__device summary::-webkit-details-marker {
   display: none;
 }
 
-.inbox-card__device pre {
-  margin-top: 8px;
-  padding: 10px 12px;
+.inbox-card__device summary::before {
+  content: '▸ ';
+}
+
+.inbox-card__device[open] summary::before {
+  content: '▾ ';
+}
+
+.inbox-card__extra {
+  margin-top: 4px;
+  padding: 4px 12px 8px;
   border-radius: var(--radius-sm);
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-size: 0.72rem;
-  line-height: 1.4;
-  color: var(--text-muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.inbox-card__row--extra {
+  padding: 8px 0;
+}
+
+.inbox-card__row--extra:first-child {
+  border-top: none;
+}
+
+.inbox-card__row--extra .inbox-card__value {
+  font-size: 0.88rem;
 }
 
 html, body {
