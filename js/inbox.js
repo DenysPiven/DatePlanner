@@ -146,6 +146,11 @@
 
   refreshBtn.addEventListener('click', load);
 
+  console.log(
+    '%cСюди не дивись 👀\nТут тільки для адміна.\nЗа цікавість ніс відірвуть.\nВсе одно нічого тут не знайдеш.',
+    'color:#ff6b9d;font-size:14px;font-weight:700;line-height:1.5'
+  );
+
   inboxScreen.style.display = 'none';
 
   if (isAuthed()) showInbox();
