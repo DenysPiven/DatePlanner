@@ -1,9 +1,10 @@
 /**
  * Profile & delivery settings — edit this file for your page.
  *
- * Applications are emailed to applicationEmail (FormSubmit).
- * First time: open the "Activate Form" email (check Spam) and click the link.
- * Optional: web3formsKey from https://web3forms.com — more reliable email delivery.
+ * EMAIL: set appsScriptUrl after deploying email-worker.gs (see that file).
+ * FormSubmit is NOT used (activation links break).
+ *
+ * Backup: ntfyTopic — open https://ntfy.sh/<topic> on your phone.
  */
 const PROFILE = {
   name: 'Аня',
@@ -12,18 +13,25 @@ const PROFILE = {
   tagline: 'Шукаю того, з ким захочеться залишитись на другу каву',
   bio: 'Люблю живі розмови і вечірні прогулянки. Без ігор і тиску. Нижче — коротко про тебе і приблизний план вечора; варіанти з міткою «мені заходить» — те, що мені ближче.',
 
-  /** Gmail inbox for applications */
+  /** Shown in emails / notifications */
   applicationEmail: 'pivden2000@gmail.com',
 
   /**
-   * Access key from https://web3forms.com (enter pivden2000@gmail.com, copy key from email).
-   * If set, used as primary email delivery (more reliable than FormSubmit).
+   * Google Apps Script web app URL (from Deploy → Web app).
+   * Paste here after deploying email-worker.gs — emails go to pivden2000@gmail.com.
+   * Example: 'https://script.google.com/macros/s/XXXX/exec'
+   */
+  appsScriptUrl: '',
+
+  /**
+   * Optional: access key from https://web3forms.com
+   * (enter pivden2000@gmail.com, paste key from their email)
    */
   web3formsKey: '',
 
   /**
-   * Instant backup notifications (works even before FormSubmit is activated).
-   * Open https://ntfy.sh/dateplanner-pivden2000 on your phone or browser.
+   * Instant notifications (works now, no setup).
+   * Open: https://ntfy.sh/dateplanner-pivden2000
    */
   ntfyTopic: 'dateplanner-pivden2000',
 

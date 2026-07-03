@@ -334,6 +334,23 @@
     return value === true || value === 'true' || value === 1 || value === '1';
   }
 
+  /** Gmail via your Google Apps Script (email-worker.gs). */
+  async function sendViaAppsScript(payload) {
+    const url = (PROFILE.appsScriptUrl || '').trim();
+    if (!url) return { ok: false, skipped: true };
+
+    // text/plain + no-cors avoids CORS preflight; GAS still receives the body.
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+
+    // Opaque response — request was sent; treat as delivered.
+    return { ok: true };
+  }
+
   async function sendViaWeb3Forms(payload) {
     const key = (PROFILE.web3formsKey || '').trim();
     if (!key) return { ok: false, skipped: true };
@@ -355,67 +372,11 @@
         when: payload.when,
         about: payload.about,
         plan: payload.plan,
-        lifestyle: payload.lifestyle,
-        energy: payload.energy,
-        duration: payload.duration,
-        topics: payload.topics,
-        venue: payload.venue,
-        drinkOrMeal: payload.drinkOrMeal,
-        after: payload.after,
-        place: payload.place,
-        city: payload.city,
         botcheck: ''
       })
     });
 
     const data = await res.json().catch(() => ({}));
-    return { ok: res.ok && isSuccessFlag(data.success), data };
-  }
-
-  async function sendViaFormSubmit(payload) {
-    const email = (PROFILE.applicationEmail || '').trim();
-    if (!email) return { ok: false, skipped: true };
-
-    const body = {
-      name: payload.instagram,
-      email: email,
-      _subject: `Заявка на побачення: ${payload.instagram}`,
-      _replyto: 'noreply@dateplanner.app',
-      message: applicationMessage(payload),
-      instagram: payload.instagram,
-      when: payload.when,
-      about: payload.about,
-      plan: payload.plan,
-      lifestyle: payload.lifestyle,
-      energy: payload.energy,
-      duration: payload.duration,
-      topics: payload.topics,
-      venue: payload.venue,
-      drinkOrMeal: payload.drinkOrMeal,
-      after: payload.after,
-      place: payload.place,
-      city: payload.city,
-      submittedAt: payload.submittedAt
-    };
-
-    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-
-    const data = await res.json().catch(() => ({}));
-    const msg = String(data.message || '');
-    const needsActivation = /activation|activate form/i.test(msg);
-
-    // FormSubmit returns success as the string "false" when not activated.
-    if (needsActivation) {
-      return { ok: false, needsActivation: true, data };
-    }
-
     return { ok: res.ok && isSuccessFlag(data.success), data };
   }
 
@@ -438,21 +399,13 @@
 
   async function sendApplication(payload) {
     const results = await Promise.allSettled([
+      sendViaAppsScript(payload),
       sendViaWeb3Forms(payload),
-      sendViaFormSubmit(payload),
       sendViaNtfy(payload)
     ]);
 
     const values = results.map((r) => (r.status === 'fulfilled' ? r.value : { ok: false }));
     const delivered = values.some((v) => v && v.ok);
-
-    const formSubmit = values[1] || {};
-    if (formSubmit.needsActivation) {
-      console.warn(
-        'FormSubmit: activate email first. Check Spam for "Activate Form" at',
-        PROFILE.applicationEmail
-      );
-    }
 
     if (!delivered) {
       values.forEach((v) => {

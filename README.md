@@ -21,12 +21,23 @@ Options with `recommended: true` show a **«мені заходить»** badge 
 
 ## Where applications go
 
-To **`PROFILE.applicationEmail`** in `js/config.js` (email via [FormSubmit](https://formsubmit.co)).
+**FormSubmit is not used** (activation links break).
 
-1. Set your email in `applicationEmail`
-2. Submit one test application
-3. Open the **Confirm your email** letter from FormSubmit and confirm once
-4. After that, every application arrives in that inbox (subject: `Заявка на побачення: @instagram`)
+### Email (Gmail) — Google Apps Script
+
+1. Open [script.google.com](https://script.google.com) → New project  
+2. Paste `email-worker.gs` (email is already `pivden2000@gmail.com`)  
+3. **Deploy → New deployment → Web app**  
+   - Execute as: **Me**  
+   - Who has access: **Anyone**  
+4. Copy the URL into `js/config.js` → `appsScriptUrl`  
+5. Commit & push  
+
+Applications then arrive at **pivden2000@gmail.com**.
+
+### Instant backup (works without setup)
+
+Open **https://ntfy.sh/dateplanner-pivden2000** on your phone/browser.
 
 ## Customize
 
