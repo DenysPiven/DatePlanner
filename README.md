@@ -38,14 +38,12 @@ python3 -m http.server 8080
 │   ├── i18n.js   # Ukrainian UI strings (questionnaire)
 │   ├── data.js   # Swipe cards & places (Ukrainian)
 │   └── app.js    # App logic (English comments)
-├── .github/workflows/pages.yml
 └── README.md
 ```
 
 ## GitHub Pages setup
 
-1. **Settings → Pages → Source: GitHub Actions**
-2. The included workflow deploys on push to `main` / `master`
+**Settings → Pages → Source: Deploy from a branch** → `main` / `/` (root)
 
 ## Stack
 
