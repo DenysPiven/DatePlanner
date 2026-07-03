@@ -16,7 +16,7 @@ const PROFILE = {
    * Applications are emailed here via FormSubmit.
    * Change to your real inbox. Leave empty only for local testing.
    */
-  applicationEmail: 'denys.piven.my@gmail.com',
+  applicationEmail: 'pivden2000@gmail.com',
 
   photos: [
     {
