@@ -191,7 +191,7 @@
         </div>
         <div class="inbox-card__row"><span>Коли</span><div class="inbox-card__value">${escapeHtml(app.when || '—')}</div></div>
         <div class="inbox-card__row"><span>Про себе</span><div class="inbox-card__value">${escapeHtml(app.whyMe || '—')}</div></div>
-        <div class="inbox-card__row"><span>Про нього</span><div class="inbox-card__value">${escapeHtml(app.about || '—')}</div></div>
+        <div class="inbox-card__row"><span>Анкета</span><div class="inbox-card__value">${escapeHtml(app.about || '—')}</div></div>
         <div class="inbox-card__row"><span>Фільтри</span><div class="inbox-card__value">${escapeHtml(app.filters || [app.smoking, app.alcohol].filter(Boolean).join(' · ') || '—')}</div></div>
         <div class="inbox-card__row"><span>План</span><div class="inbox-card__value">${escapeHtml(app.plan || '—')}</div></div>
         <div class="inbox-card__row"><span>Пристрій</span><div class="inbox-card__value">${escapeHtml(deviceSummary(device))}</div></div>

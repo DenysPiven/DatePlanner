@@ -35,7 +35,7 @@ const UI = {
   submitting: 'Надсилаю…',
 
   doneTitle: 'Заявку надіслано',
-  doneText: 'Я подивлюсь і сама вирішу. Якщо підійдеш — напишу в Instagram протягом 48 годин.',
+  doneText: 'Я подивлюсь і сам вирішу. Якщо підійдеш — напишу в Instagram протягом 48 годин.',
   doneHint: 'Можеш закрити сторінку',
 
   summaryWhen: 'Коли',
@@ -47,5 +47,5 @@ const UI = {
   toastSent: '✅ Заявку надіслано',
   toastError: 'Не вдалось надіслати. Спробуй ще раз або напиши в Instagram',
   toastInstagram: 'Вкажи Instagram',
-  ageCity: (age, city) => `${age} · ${city}`
+  ageCity: (age, city) => (age ? `${age} · ${city}` : city)
 };
