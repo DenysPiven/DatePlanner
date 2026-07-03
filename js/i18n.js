@@ -28,9 +28,9 @@ const UI = {
   applySub: 'Лише Instagram. Відповім протягом 48 годин, якщо підійдеш',
   instagram: 'Твій Instagram',
   instagramPlaceholder: '@username',
-  whyMe: 'Чому хочеш піти саме зі мною?',
-  whyMePlaceholder: 'Кілька чесних слів…',
-  whyMeRequired: 'Напиши кілька слів',
+  whyMe: 'Про себе',
+  whyMePlaceholder: 'Коротко про себе…',
+  whyMeRequired: 'Напиши кілька слів про себе',
   submit: 'Надіслати заявку',
   submitting: 'Надсилаю…',
 
@@ -42,7 +42,7 @@ const UI = {
   summaryPlan: 'План',
   summaryAbout: 'Про тебе',
   summaryFilters: 'Фільтри',
-  summaryWhy: 'Чому я',
+  summaryWhy: 'Про себе',
 
   toastSent: '✅ Заявку надіслано',
   toastError: 'Не вдалось надіслати. Спробуй ще раз або напиши в Instagram',
