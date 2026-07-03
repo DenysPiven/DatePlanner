@@ -75,7 +75,9 @@
           <span class="inbox-card__time">${formatWhen(app.submittedAt)}</span>
         </div>
         <div class="inbox-card__row"><span>Коли</span>${app.when || '—'}</div>
+        <div class="inbox-card__row"><span>Чому я</span>${app.whyMe || '—'}</div>
         <div class="inbox-card__row"><span>Про нього</span>${app.about || '—'}</div>
+        <div class="inbox-card__row"><span>Фільтри</span>${app.filters || [app.smoking, app.alcohol].filter(Boolean).join(' · ') || '—'}</div>
         <div class="inbox-card__row"><span>План</span>${app.plan || '—'}</div>
         <div class="inbox-card__meta">#${index + 1}</div>
       </article>

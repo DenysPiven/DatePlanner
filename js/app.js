@@ -1,18 +1,36 @@
 (function () {
   'use strict';
 
-  /**
-   * Path length varies slightly (place step optional).
-   * Progress uses an estimated max of 10 screens.
-   */
-  const TOTAL_SCREENS = 10;
+  const DRAFT_KEY = 'dateplanner_draft';
+
+  /** Progress map: current step → weight (out of PROGRESS_TOTAL). */
+  const PROGRESS = {
+    intro: 0,
+    lifestyle: 1,
+    energy: 2,
+    smoking: 3,
+    alcohol: 4,
+    duration: 5,
+    topics: 6,
+    venue: 7,
+    drink: 8,
+    meal_style: 8,
+    after: 9,
+    place: 10,
+    when: 11,
+    apply: 12,
+    done: 13
+  };
+  const PROGRESS_TOTAL = 13;
 
   const state = {
+    screen: 'intro',
     screenIndex: 0,
     datetime: {},
     answers: {},
     questionId: 'lifestyle',
-    instagram: ''
+    instagram: '',
+    whyMe: ''
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -36,6 +54,8 @@
     $('#applySub').textContent = UI.applySub;
     $('#labelInstagram').textContent = UI.instagram;
     $('#instagramInput').placeholder = UI.instagramPlaceholder;
+    $('#labelWhyMe').textContent = UI.whyMe;
+    $('#whyMeInput').placeholder = UI.whyMePlaceholder;
     $('#submitBtn').textContent = UI.submit;
     $('#doneTitle').textContent = UI.doneTitle;
     $('#doneText').textContent = UI.doneText;
@@ -48,17 +68,151 @@
     setTimeout(() => toast.classList.remove('toast--visible'), 2500);
   }
 
+  function updateProgress(key) {
+    const current = PROGRESS[key] != null ? PROGRESS[key] : 0;
+    const pct = Math.round((current / PROGRESS_TOTAL) * 100);
+    const left = Math.max(0, PROGRESS_TOTAL - current);
+    progressBar.style.width = `${Math.max(pct, key === 'intro' ? 4 : pct)}%`;
+
+    if (key === 'intro') {
+      stepLabel.textContent = UI.welcome;
+    } else if (key === 'done') {
+      stepLabel.textContent = UI.progressDone;
+      progressBar.style.width = '100%';
+    } else {
+      stepLabel.textContent = UI.progress(pct, left);
+    }
+  }
+
   function showScreen(name) {
+    state.screen = name;
     $$('.step').forEach((el) => el.classList.remove('step--active'));
     const target = document.querySelector(`[data-screen="${name}"]`);
     if (target) target.classList.add('step--active');
 
-    progressBar.style.width = `${((state.screenIndex + 1) / TOTAL_SCREENS) * 100}%`;
+    const progressKey =
+      name === 'question' ? state.questionId : name;
+    updateProgress(progressKey);
+    saveDraft();
+  }
 
-    if (name === 'intro') {
-      stepLabel.textContent = UI.welcome;
+  /* —— Draft (sessionStorage) —— */
+  function saveDraft() {
+    if (state.screen === 'done' || state.screen === 'intro') return;
+    try {
+      const draft = {
+        screen: state.screen,
+        questionId: state.questionId,
+        screenIndex: state.screenIndex,
+        answers: state.answers,
+        datetime: state.datetime,
+        instagram: state.instagram,
+        whyMe: state.whyMe,
+        introIndex
+      };
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function clearDraft() {
+    try {
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function hydrateAnswers(saved) {
+    const out = {};
+    if (!saved || typeof saved !== 'object') return out;
+
+    Object.keys(saved).forEach((key) => {
+      const q = QUESTIONS[key];
+      const val = saved[key];
+      if (!q || !val) return;
+
+      if (Array.isArray(val)) {
+        out[key] = val
+          .map((v) => {
+            const id = v && v.id ? v.id : v;
+            return q.options.find((o) => o.id === id);
+          })
+          .filter(Boolean);
+      } else {
+        const id = val.id || val;
+        out[key] = q.options.find((o) => o.id === id) || val;
+      }
+    });
+
+    return out;
+  }
+
+  function hasDraft() {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (!raw) return false;
+      const draft = JSON.parse(raw);
+      return draft && draft.screen && draft.screen !== 'intro' && draft.screen !== 'done';
+    } catch {
+      return false;
+    }
+  }
+
+  function restoreDraft() {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (!raw) return false;
+      const draft = JSON.parse(raw);
+      if (!draft || !draft.screen || draft.screen === 'intro' || draft.screen === 'done') {
+        return false;
+      }
+
+      state.answers = hydrateAnswers(draft.answers);
+      state.datetime = draft.datetime || {};
+      state.questionId = draft.questionId || 'lifestyle';
+      state.screenIndex = draft.screenIndex || 1;
+      state.instagram = draft.instagram || '';
+      state.whyMe = draft.whyMe || '';
+
+      if (draft.datetime && draft.datetime.date) {
+        $('#dateInput').value = draft.datetime.date;
+      }
+      if (draft.datetime && draft.datetime.time) {
+        $('#timeInput').value = draft.datetime.time;
+        $$('#timeChips .chip').forEach((c) => {
+          c.classList.toggle('chip--active', c.dataset.time === draft.datetime.time);
+        });
+      }
+      if (state.instagram) $('#instagramInput').value = state.instagram;
+      if (state.whyMe) $('#whyMeInput').value = state.whyMe;
+
+      if (draft.screen === 'question') {
+        renderQuestion(state.questionId);
+      } else if (draft.screen === 'when') {
+        showScreen('when');
+      } else if (draft.screen === 'apply') {
+        renderPreview();
+        showScreen('apply');
+      } else {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function updateStartButton() {
+    const btn = $('#startBtn');
+    if (hasDraft()) {
+      btn.textContent = UI.continue;
+      btn.dataset.resume = '1';
     } else {
-      stepLabel.textContent = UI.step(Math.min(state.screenIndex, TOTAL_SCREENS - 1), TOTAL_SCREENS - 1);
+      btn.textContent = UI.start;
+      delete btn.dataset.resume;
     }
   }
 
@@ -133,6 +287,9 @@
     state.answers = {};
     state.questionId = 'lifestyle';
     state.screenIndex = 1;
+    state.datetime = {};
+    state.instagram = '';
+    state.whyMe = '';
     renderQuestion('lifestyle');
   }
 
@@ -153,6 +310,12 @@
     renderQuestion(nextId);
   }
 
+  function pulseCard(el) {
+    el.classList.remove('choice__card--pulse');
+    void el.offsetWidth;
+    el.classList.add('choice__card--pulse');
+  }
+
   function renderQuestion(id) {
     const q = QUESTIONS[id];
     if (!q) return;
@@ -171,6 +334,10 @@
     if (isMulti) list.classList.add('choice--multi');
 
     const selected = new Set();
+    const existing = state.answers[id];
+    if (isMulti && Array.isArray(existing)) {
+      existing.forEach((o) => selected.add(o.id));
+    }
 
     q.options.forEach((opt, i) => {
       if (isPair && i === 1) {
@@ -183,7 +350,10 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'choice__card' + (opt.recommended ? ' choice__card--recommended' : '');
+      if (isMulti && selected.has(opt.id)) btn.classList.add('choice__card--checked');
       btn.dataset.id = opt.id;
+      btn.style.animationDelay = `${i * 40}ms`;
+      btn.classList.add('choice__card--enter');
       btn.innerHTML = `
         ${opt.recommended ? `<span class="choice__badge">${UI.recommended}</span>` : ''}
         ${isMulti ? '<span class="choice__check" aria-hidden="true"></span>' : ''}
@@ -196,6 +366,7 @@
 
       if (isMulti) {
         btn.addEventListener('click', () => {
+          pulseCard(btn);
           if (selected.has(opt.id)) {
             selected.delete(opt.id);
             btn.classList.remove('choice__card--checked');
@@ -214,7 +385,7 @@
 
     if (isMulti) {
       nextBtn.hidden = false;
-      nextBtn.disabled = true;
+      nextBtn.disabled = selected.size === 0;
       nextBtn.onclick = () => {
         if (!selected.size) {
           showToast(UI.pickAtLeastOne);
@@ -234,13 +405,14 @@
 
   function pickSingle(question, option, btnEl) {
     state.answers[question.id] = option;
+    pulseCard(btnEl);
 
     $$('#choiceList .choice__card').forEach((c) => {
       if (c === btnEl) c.classList.add('choice__card--picked');
       else c.classList.add('choice__card--lost');
     });
 
-    setTimeout(() => goNext(option.next), 280);
+    setTimeout(() => goNext(option.next), 320);
   }
 
   /* —— Summary & apply —— */
@@ -251,6 +423,7 @@
 
   const PLAN_KEYS = ['duration', 'venue', 'drink', 'meal_style', 'after', 'place'];
   const ABOUT_KEYS = ['lifestyle', 'energy', 'topics'];
+  const FILTER_KEYS = ['smoking', 'alcohol'];
 
   function answerTitle(value) {
     if (!value) return '';
@@ -271,6 +444,7 @@
   function renderPreview() {
     const dateFormatted = formatDate(state.datetime.date);
     const about = linesFromKeys(ABOUT_KEYS).join(' · ');
+    const filters = linesFromKeys(FILTER_KEYS).join(' · ');
     const plan = linesFromKeys(PLAN_KEYS).join(' → ');
 
     $('#previewCard').innerHTML = `
@@ -284,6 +458,10 @@
       <div class="summary__row">
         <span class="summary__row-icon">👤</span>
         <div><span class="summary__row-label">${UI.summaryAbout}</span>${about}</div>
+      </div>
+      <div class="summary__row">
+        <span class="summary__row-icon">🚫</span>
+        <div><span class="summary__row-label">${UI.summaryFilters}</span>${filters}</div>
       </div>
       <div class="summary__row">
         <span class="summary__row-icon">💫</span>
@@ -303,11 +481,15 @@
   function buildApplicationPayload() {
     return {
       instagram: '@' + state.instagram,
+      whyMe: state.whyMe,
       when: `${state.datetime.date} ${state.datetime.time}`,
       about: linesFromKeys(ABOUT_KEYS).join(' · '),
+      filters: linesFromKeys(FILTER_KEYS).join(' · '),
       plan: linesFromKeys(PLAN_KEYS).join(' → '),
       lifestyle: answerTitle(state.answers.lifestyle),
       energy: answerTitle(state.answers.energy),
+      smoking: answerTitle(state.answers.smoking),
+      alcohol: answerTitle(state.answers.alcohol),
       duration: answerTitle(state.answers.duration),
       topics: answerTitle(state.answers.topics),
       venue: answerTitle(state.answers.venue),
@@ -351,12 +533,22 @@
   async function handleApply(e) {
     e.preventDefault();
     const handle = normalizeInstagram($('#instagramInput').value);
+    const whyMe = ($('#whyMeInput').value || '').trim();
+
     if (!handle) {
       showToast(UI.toastInstagram);
       return;
     }
+    if (!whyMe) {
+      showToast(UI.whyMeRequired);
+      $('#whyMeInput').focus();
+      return;
+    }
 
     state.instagram = handle;
+    state.whyMe = whyMe;
+    saveDraft();
+
     const btn = $('#submitBtn');
     btn.disabled = true;
     btn.textContent = UI.submitting;
@@ -364,8 +556,9 @@
     try {
       const ok = await sendApplication(buildApplicationPayload());
       if (!ok) throw new Error('send failed');
+      clearDraft();
       showToast(UI.toastSent);
-      state.screenIndex = TOTAL_SCREENS - 1;
+      state.screenIndex = PROGRESS_TOTAL;
       showScreen('done');
     } catch {
       showToast(UI.toastError);
@@ -379,11 +572,17 @@
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     dateInput.min = new Date().toISOString().split('T')[0];
-    dateInput.value = tomorrow.toISOString().split('T')[0];
+    if (!dateInput.value) {
+      dateInput.value = tomorrow.toISOString().split('T')[0];
+    }
   }
 
   function bindEvents() {
     $('#startBtn').addEventListener('click', () => {
+      if ($('#startBtn').dataset.resume === '1') {
+        if (restoreDraft()) return;
+      }
+      clearDraft();
       startQuestions();
     });
 
@@ -404,6 +603,16 @@
       });
     });
 
+    $('#instagramInput').addEventListener('input', () => {
+      state.instagram = normalizeInstagram($('#instagramInput').value);
+      saveDraft();
+    });
+
+    $('#whyMeInput').addEventListener('input', () => {
+      state.whyMe = ($('#whyMeInput').value || '').trim();
+      saveDraft();
+    });
+
     $('#applyForm').addEventListener('submit', handleApply);
   }
 
@@ -418,6 +627,7 @@
     renderIntro();
     initDateDefaults();
     bindEvents();
+    updateStartButton();
     state.screenIndex = 0;
     showScreen('intro');
   }

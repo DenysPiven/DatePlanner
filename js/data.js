@@ -56,7 +56,7 @@ const QUESTIONS = {
   energy: {
     id: 'energy',
     multi: true,
-    next: 'duration',
+    next: 'smoking',
     title: 'Як проводиш вільний час?',
     sub: 'Можна кілька варіантів',
     options: [
@@ -85,6 +85,68 @@ const QUESTIONS = {
         title: 'Просто відпочинок',
         desc: 'Без планів, як піде',
         photo: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900&q=80'
+      }
+    ]
+  },
+
+  /* —— Critical filters —— */
+  smoking: {
+    id: 'smoking',
+    title: 'Куріння?',
+    sub: 'Важливо знати на березі',
+    options: [
+      {
+        id: 'no_smoke',
+        title: 'Не курю',
+        desc: 'Зовсім',
+        photo: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=900&q=80',
+        recommended: true,
+        next: 'alcohol'
+      },
+      {
+        id: 'sometimes_smoke',
+        title: 'Іноді',
+        desc: 'Рідко, не залежність',
+        photo: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900&q=80',
+        next: 'alcohol'
+      },
+      {
+        id: 'smoke',
+        title: 'Курю',
+        desc: 'Регулярно',
+        photo: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900&q=80',
+        next: 'alcohol'
+      }
+    ]
+  },
+
+  alcohol: {
+    id: 'alcohol',
+    title: 'Алкоголь?',
+    sub: 'Теж важливо',
+    options: [
+      {
+        id: 'no_alc',
+        title: 'Не пʼю',
+        desc: 'Тверезий спосіб життя',
+        photo: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=900&q=80',
+        recommended: true,
+        next: 'duration'
+      },
+      {
+        id: 'sometimes_alc',
+        title: 'Іноді',
+        desc: 'За настроєм, без фанатизму',
+        photo: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=900&q=80',
+        recommended: true,
+        next: 'duration'
+      },
+      {
+        id: 'often_alc',
+        title: 'Люблю випити',
+        desc: 'Часто за келихом',
+        photo: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=900&q=80',
+        next: 'duration'
       }
     ]
   },
