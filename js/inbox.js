@@ -13,21 +13,40 @@
   const refreshBtn = document.getElementById('refreshBtn');
   const logoutBtn = document.getElementById('logoutBtn');
 
+  function normalizePass(value) {
+    return String(value || '')
+      .trim()
+      .replace(/\s+/g, '')
+      .toLowerCase();
+  }
+
   function isAuthed() {
-    return sessionStorage.getItem(SESSION_KEY) === '1';
+    try {
+      return sessionStorage.getItem(SESSION_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  function setAuthed(on) {
+    try {
+      if (on) sessionStorage.setItem(SESSION_KEY, '1');
+      else sessionStorage.removeItem(SESSION_KEY);
+    } catch {
+      /* private mode — ignore */
+    }
   }
 
   function showLogin() {
-    loginScreen.hidden = false;
-    inboxScreen.hidden = true;
+    loginScreen.style.display = '';
+    inboxScreen.style.display = 'none';
     loginError.hidden = true;
     passwordInput.value = '';
-    setTimeout(() => passwordInput.focus(), 50);
   }
 
   function showInbox() {
-    loginScreen.hidden = true;
-    inboxScreen.hidden = false;
+    loginScreen.style.display = 'none';
+    inboxScreen.style.display = '';
     load();
   }
 
@@ -91,25 +110,34 @@
     }
   }
 
+  function tryLogin(raw) {
+    const expected = normalizePass(INBOX_PASSWORD);
+    const got = normalizePass(raw);
+    if (!expected || got !== expected) {
+      loginError.hidden = false;
+      passwordInput.value = '';
+      passwordInput.focus();
+      return false;
+    }
+    setAuthed(true);
+    showInbox();
+    return true;
+  }
+
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const value = passwordInput.value;
-    if (value === INBOX_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, '1');
-      showInbox();
-      return;
-    }
-    loginError.hidden = false;
-    passwordInput.value = '';
-    passwordInput.focus();
+    tryLogin(passwordInput.value);
   });
 
   logoutBtn.addEventListener('click', () => {
-    sessionStorage.removeItem(SESSION_KEY);
+    setAuthed(false);
     showLogin();
   });
 
   refreshBtn.addEventListener('click', load);
+
+  // Start: hide inbox until auth
+  inboxScreen.style.display = 'none';
 
   if (isAuthed()) showInbox();
   else showLogin();

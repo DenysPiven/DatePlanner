@@ -12,7 +12,7 @@ Every application is saved to online storage.
 
 https://denyspiven.github.io/DatePlanner/inbox.html
 
-Password is set in `js/config.js` → `INBOX_PASSWORD`.
+Password: `vechir` (change in `js/config.js` → `INBOX_PASSWORD`).
 
 ## Local dev
 

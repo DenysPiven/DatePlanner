@@ -31,5 +31,5 @@ const STORAGE = {
   key: '9db89f97badf1defda339eb1ff0efb07de086257b770d39b471071b1102bf50e'
 };
 
-/** Password for inbox.html — change anytime */
-const INBOX_PASSWORD = 'vechir2026';
+/** Password for inbox.html — change anytime (case-insensitive) */
+const INBOX_PASSWORD = 'vechir';
