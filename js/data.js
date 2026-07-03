@@ -1,115 +1,277 @@
-/** Swipe cards and location data — Ukrainian questionnaire content. */
+/**
+ * Questionnaire content — Ukrainian UI.
+ * Questions girls care about come first; places are Vinnytsia-only with photos.
+ */
+
+/** Priority questions (what she wants to know about him). */
+const PRIORITY_CARDS = [
+  {
+    id: 'serious',
+    title: 'Серйозні наміри',
+    desc: 'Шукаю не «просто поговорити», а людину для реальних зустрічей',
+    photo: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900&q=80'
+  },
+  {
+    id: 'plans',
+    title: 'Вмієш планувати',
+    desc: 'Сам пропонуєш ідеї побачення, а не лише «ну куди хочеш?»',
+    photo: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900&q=80'
+  },
+  {
+    id: 'respect',
+    title: 'Повага до кордонів',
+    desc: 'Без тиску, без ревнощів з першого дня, без «ти повинна»',
+    photo: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80'
+  },
+  {
+    id: 'messages',
+    title: 'Нормальне спілкування',
+    desc: 'Пишеш змістовно, не зникаєш після «привіт» і не сиплеш тільки мемами',
+    photo: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=900&q=80'
+  },
+  {
+    id: 'listen',
+    title: 'Вмієш слухати',
+    desc: 'Цікавишся мною, а не лише розповідаєш про себе',
+    photo: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=900&q=80'
+  },
+  {
+    id: 'humor',
+    title: 'Почуття гумору',
+    desc: 'Можемо сміятись разом — без образ і токсичних жартів',
+    photo: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900&q=80'
+  },
+  {
+    id: 'present',
+    title: 'Живе спілкування',
+    desc: 'На побаченні в телефоні не сидиш — дивишся в очі',
+    photo: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=900&q=80'
+  },
+  {
+    id: 'own_life',
+    title: 'Маєш своє життя',
+    desc: 'Хобі, друзі, цілі — не шукаєш «рятівницю від нудьги»',
+    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80'
+  }
+];
+
 const SWIPE_CARDS = {
   food: [
-    { id: 'pizza', title: 'Піца', emoji: '🍕', desc: 'Італійська класика', gradient: 'linear-gradient(135deg, #ff6b35, #f7931e)' },
-    { id: 'sushi', title: 'Суші', emoji: '🍣', desc: 'Японська кухня', gradient: 'linear-gradient(135deg, #e63946, #ff6b6b)' },
-    { id: 'cafe', title: 'Кафе', emoji: '☕', desc: 'Кава та десерти', gradient: 'linear-gradient(135deg, #6f4e37, #a67c52)' },
-    { id: 'burger', title: 'Бургери', emoji: '🍔', desc: 'Непримушена вечеря', gradient: 'linear-gradient(135deg, #f4a261, #e76f51)' },
-    { id: 'ukrainian', title: 'Українська кухня', emoji: '🥟', desc: 'Борщ, вареники, домашнє', gradient: 'linear-gradient(135deg, #2a9d8f, #264653)' },
-    { id: 'pasta', title: 'Паста', emoji: '🍝', desc: 'Романтична вечеря', gradient: 'linear-gradient(135deg, #e9c46a, #f4a261)' },
-    { id: 'dessert', title: 'Десерти', emoji: '🍰', desc: 'Солодке та морозиво', gradient: 'linear-gradient(135deg, #ffafcc, #ffc8dd)' },
-    { id: 'wine', title: 'Вино-бар', emoji: '🍷', desc: 'Келих і розмова', gradient: 'linear-gradient(135deg, #7209b7, #560bad)' }
+    {
+      id: 'cafe',
+      title: 'Кавʼярня',
+      desc: 'Кава, десерт і спокійна розмова',
+      photo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900&q=80'
+    },
+    {
+      id: 'restaurant',
+      title: 'Ресторан',
+      desc: 'Повноцінна вечеря у красивому місці',
+      photo: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&q=80'
+    },
+    {
+      id: 'sushi',
+      title: 'Суші',
+      desc: 'Японська кухня на двох',
+      photo: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=900&q=80'
+    },
+    {
+      id: 'pizza',
+      title: 'Піца / стрітфуд',
+      desc: 'Невимушено і смачно',
+      photo: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=900&q=80'
+    },
+    {
+      id: 'ukrainian',
+      title: 'Українська кухня',
+      desc: 'Домашнє, ситне, своє',
+      photo: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=900&q=80'
+    },
+    {
+      id: 'wine',
+      title: 'Вино / коктейлі',
+      desc: 'Келих і довга розмова',
+      photo: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=900&q=80'
+    },
+    {
+      id: 'dessert',
+      title: 'Солодке',
+      desc: 'Тортик, морозиво, вафлі',
+      photo: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=900&q=80'
+    }
   ],
   activity: [
-    { id: 'cinema', title: 'Кіно', emoji: '🎬', desc: 'Новий фільм у кінотеатрі', gradient: 'linear-gradient(135deg, #1d3557, #457b9d)' },
-    { id: 'walk', title: 'Прогулянка', emoji: '🌳', desc: 'Парк або набережна', gradient: 'linear-gradient(135deg, #2d6a4f, #52b788)' },
-    { id: 'museum', title: 'Музей / галерея', emoji: '🖼️', desc: 'Культура та мистецтво', gradient: 'linear-gradient(135deg, #5e548e, #9f86c0)' },
-    { id: 'bowling', title: 'Боулінг', emoji: '🎳', desc: 'Весело та змагання', gradient: 'linear-gradient(135deg, #bc4749, #6a040f)' },
-    { id: 'karaoke', title: 'Караоке', emoji: '🎤', desc: 'Співаємо разом', gradient: 'linear-gradient(135deg, #7b2cbf, #c77dff)' },
-    { id: 'games', title: 'Настільні ігри', emoji: '🎲', desc: 'Кафе з іграми', gradient: 'linear-gradient(135deg, #0077b6, #00b4d8)' },
-    { id: 'concert', title: 'Концерт', emoji: '🎵', desc: 'Жива музика', gradient: 'linear-gradient(135deg, #370617, #9d0208)' },
-    { id: 'photo', title: 'Фотопрогулянка', emoji: '📸', desc: 'Красиві локації міста', gradient: 'linear-gradient(135deg, #ff758f, #ff7eb3)' }
-  ],
-  vibe: [
-    { id: 'romantic', title: 'Романтично', emoji: '💕', desc: 'Тихо, затишно, для двох', gradient: 'linear-gradient(135deg, #ff006e, #8338ec)' },
-    { id: 'fun', title: 'Весело', emoji: '🎉', desc: 'Сміх, активність, енергія', gradient: 'linear-gradient(135deg, #ffbe0b, #fb5607)' },
-    { id: 'cozy', title: 'Затишно', emoji: '🕯️', desc: 'Спокійний вечір без метушні', gradient: 'linear-gradient(135deg, #606c38, #283618)' },
-    { id: 'surprise', title: 'Сюрприз', emoji: '✨', desc: 'Нехай буде несподіванка', gradient: 'linear-gradient(135deg, #7400b8, #5390d9)' },
-    { id: 'adventure', title: 'Пригода', emoji: '🗺️', desc: 'Щось нове і незвичне', gradient: 'linear-gradient(135deg, #06d6a0, #118ab2)' },
-    { id: 'talk', title: 'Поговорити', emoji: '💬', desc: 'Головне — розмова', gradient: 'linear-gradient(135deg, #495057, #868e96)' }
+    {
+      id: 'walk',
+      title: 'Прогулянка',
+      desc: 'Набережна, парк, центр міста',
+      photo: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=900&q=80'
+    },
+    {
+      id: 'cinema',
+      title: 'Кіно',
+      desc: 'Фільм і обговорення після',
+      photo: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=900&q=80'
+    },
+    {
+      id: 'photo',
+      title: 'Фотолокації',
+      desc: 'Красиві місця Вінниці',
+      photo: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=900&q=80'
+    },
+    {
+      id: 'museum',
+      title: 'Музей / виставка',
+      desc: 'Культура без нудьги',
+      photo: 'https://images.unsplash.com/photo-1554907984-15263bfd63bd?w=900&q=80'
+    },
+    {
+      id: 'games',
+      title: 'Настільні ігри',
+      desc: 'Кафе з іграми, легкий вайб',
+      photo: 'https://images.unsplash.com/photo-1611195974226-ef063636b101?w=900&q=80'
+    },
+    {
+      id: 'live',
+      title: 'Жива музика',
+      desc: 'Концерт, бар з музикою',
+      photo: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80'
+    },
+    {
+      id: 'fountain',
+      title: 'Фонтан Roshen',
+      desc: 'Класика вечірньої Вінниці',
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ROSHEN_Vinnitsa_2008_G1.jpg/960px-ROSHEN_Vinnitsa_2008_G1.jpg'
+    }
   ]
 };
 
-const CITIES = {
-  kyiv: {
-    name: 'Київ',
-    center: [50.4501, 30.5234],
-    zoom: 13,
-    places: [
-      { id: 'maidan', name: 'Майдан Незалежності', type: 'Центр міста', lat: 50.4501, lng: 30.5234, tags: ['walk', 'photo', 'cafe'] },
-      { id: 'mariinsky', name: 'Маріїнський парк', type: 'Парк', lat: 50.4478, lng: 30.5367, tags: ['walk', 'romantic', 'photo'] },
-      { id: 'trukhaniv', name: 'Труханів острів', type: 'Природа', lat: 50.4569, lng: 30.5512, tags: ['walk', 'adventure', 'fun'] },
-      { id: 'andriyivsky', name: 'Андріївський узвіз', type: 'Історичний центр', lat: 50.4597, lng: 30.5169, tags: ['walk', 'photo', 'romantic'] },
-      { id: 'globus', name: 'ТЦ Globus (площа)', type: 'Зустріч біля метро', lat: 50.4490, lng: 30.5245, tags: ['cafe', 'cinema'] },
-      { id: 'arsenal', name: 'Мистецький арсенал', type: 'Музей', lat: 50.4342, lng: 30.5533, tags: ['museum', 'romantic', 'cozy'] },
-      { id: 'hydropark', name: 'Гідропарк', type: 'Парк', lat: 50.4550, lng: 30.5750, tags: ['walk', 'fun', 'adventure'] },
-      { id: 'besarabka', name: 'Ринок біля метро Театральна', type: 'Ринок', lat: 50.4408, lng: 30.5215, tags: ['cafe', 'ukrainian', 'surprise'] }
-    ]
+const LABELS = {
+  priority: {
+    serious: 'Серйозні наміри',
+    plans: 'Вміє планувати',
+    respect: 'Повага до кордонів',
+    messages: 'Нормальне спілкування',
+    listen: 'Вміє слухати',
+    humor: 'Почуття гумору',
+    present: 'Живе спілкування',
+    own_life: 'Має своє життя'
   },
-  lviv: {
-    name: 'Львів',
-    center: [49.8397, 24.0297],
-    zoom: 14,
-    places: [
-      { id: 'rynok', name: 'Площа Ринок', type: 'Центр', lat: 49.8419, lng: 24.0315, tags: ['walk', 'cafe', 'romantic'] },
-      { id: 'opera', name: 'Львівська опера', type: 'Театр', lat: 49.8440, lng: 24.0261, tags: ['romantic', 'concert', 'cozy'] },
-      { id: 'highcastle', name: 'Високий замок', type: 'Панорама', lat: 49.8518, lng: 24.0350, tags: ['walk', 'photo', 'romantic'] },
-      { id: 'svobody', name: 'Проспект Свободи', type: 'Центр', lat: 49.8420, lng: 24.0280, tags: ['walk', 'cafe'] },
-      { id: 'strysky', name: 'Стрийський парк', type: 'Парк', lat: 49.8167, lng: 24.0433, tags: ['walk', 'cozy', 'romantic'] },
-      { id: 'chocolate', name: 'Площа біля Оперного', type: 'Зустріч', lat: 49.8435, lng: 24.0275, tags: ['cafe', 'dessert'] },
-      { id: 'arsen', name: 'Арсен', type: 'Культурний центр', lat: 49.8425, lng: 24.0320, tags: ['museum', 'cozy'] },
-      { id: 'bald', name: 'Приміський парк', type: 'Парк', lat: 49.8350, lng: 24.0180, tags: ['walk', 'fun'] }
-    ]
+  food: {
+    cafe: 'Кавʼярня',
+    restaurant: 'Ресторан',
+    sushi: 'Суші',
+    pizza: 'Піца / стрітфуд',
+    ukrainian: 'Українська кухня',
+    wine: 'Вино / коктейлі',
+    dessert: 'Солодке'
   },
-  odesa: {
-    name: 'Одеса',
-    center: [46.4825, 30.7233],
-    zoom: 13,
-    places: [
-      { id: 'deribas', name: 'Дерибасівська', type: 'Центр', lat: 46.4847, lng: 30.7411, tags: ['walk', 'cafe', 'fun'] },
-      { id: 'potemkin', name: 'Потьомкінські сходи', type: 'Пам\'ятка', lat: 46.4886, lng: 30.7414, tags: ['walk', 'photo', 'romantic'] },
-      { id: 'arcadia', name: 'Аркадія', type: 'Набережна', lat: 46.4330, lng: 30.7620, tags: ['walk', 'adventure', 'fun'] },
-      { id: 'citygarden', name: 'Міський сад', type: 'Парк', lat: 46.4860, lng: 30.7420, tags: ['walk', 'cozy', 'romantic'] },
-      { id: 'opera_odesa', name: 'Одеський театр', type: 'Театр', lat: 46.4853, lng: 30.7410, tags: ['romantic', 'concert'] },
-      { id: 'lanzheron', name: 'Ланжерон', type: 'Пляж', lat: 46.4720, lng: 30.7610, tags: ['walk', 'adventure'] }
-    ]
+  activity: {
+    walk: 'Прогулянка',
+    cinema: 'Кіно',
+    photo: 'Фотолокації',
+    museum: 'Музей / виставка',
+    games: 'Настільні ігри',
+    live: 'Жива музика',
+    fountain: 'Фонтан Roshen'
   }
 };
 
-const ACTIVITY_LABELS = {
-  cinema: 'Піти в кіно',
-  walk: 'Прогулянка',
-  museum: 'Музей або галерея',
-  bowling: 'Боулінг',
-  karaoke: 'Караоке',
-  games: 'Настільні ігри',
-  concert: 'Концерт',
-  photo: 'Фотопрогулянка'
-};
-
-const FOOD_LABELS = {
-  pizza: 'Піца',
-  sushi: 'Суші',
-  cafe: 'Кафе',
-  burger: 'Бургери',
-  ukrainian: 'Українська кухня',
-  pasta: 'Паста',
-  dessert: 'Десерти',
-  wine: 'Вино-бар'
-};
-
-const VIBE_LABELS = {
-  romantic: 'Романтична атмосфера',
-  fun: 'Весело та активно',
-  cozy: 'Затишний вечір',
-  surprise: 'Елемент сюрпризу',
-  adventure: 'Невелика пригода',
-  talk: 'Спокійна розмова'
-};
-
-const DATE_PLAN_TEMPLATES = {
-  romantic: 'Почнемо з {food} у затишному місці, потім {activity} — все в романтичному темпі.',
-  fun: 'Активний вечір: {activity}, а потім {food} — головне, щоб було весело!',
-  cozy: 'Неспішний вечір: {food}, прогулянка і {activity} без метушні.',
-  default: 'Зустрінемось о {time}, {food} + {activity} — звучить чудово!'
+/** Vinnytsia meeting spots — real city photos (Wikimedia Commons). */
+const VINNYTSIA = {
+  name: 'Вінниця',
+  center: [49.2331, 28.4682],
+  zoom: 13,
+  places: [
+    {
+      id: 'roshen',
+      name: 'Фонтан Roshen',
+      type: 'Набережна · вечірнє шоу',
+      lat: 49.2328,
+      lng: 28.4594,
+      tags: ['fountain', 'walk', 'photo', 'romantic'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/ROSHEN_Vinnitsa_2008_G1.jpg/960px-ROSHEN_Vinnitsa_2008_G1.jpg'
+    },
+    {
+      id: 'naberezhna',
+      name: 'Набережна Південного Бугу',
+      type: 'Прогулянка біля води',
+      lat: 49.2315,
+      lng: 28.4620,
+      tags: ['walk', 'photo', 'talk'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Vinnytsia_on_the_banks_of_Southern_Bug.jpg/960px-Vinnytsia_on_the_banks_of_Southern_Bug.jpg'
+    },
+    {
+      id: 'fountain_park',
+      name: 'Парк фонтанів',
+      type: 'Парк · вечір',
+      lat: 49.2320,
+      lng: 28.4605,
+      tags: ['walk', 'photo', 'cozy'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Vinnytsia_Fountain_park_1.jpg/960px-Vinnytsia_Fountain_park_1.jpg'
+    },
+    {
+      id: 'night_center',
+      name: 'Вечірній центр',
+      type: 'Прогулянка · вогні міста',
+      lat: 49.2326,
+      lng: 28.4679,
+      tags: ['walk', 'photo', 'romantic'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Vinnytsia_in_Night.jpg/960px-Vinnytsia_in_Night.jpg'
+    },
+    {
+      id: 'soborna',
+      name: 'Вулиця Соборна',
+      type: 'Кавʼярні · центр',
+      lat: 49.2335,
+      lng: 28.4710,
+      tags: ['cafe', 'walk', 'dessert'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Vinnytsia%2C_Soborna_St_02.jpg/960px-Vinnytsia%2C_Soborna_St_02.jpg'
+    },
+    {
+      id: 'soborna_night',
+      name: 'Соборна ввечері',
+      type: 'Вечірня прогулянка',
+      lat: 49.2332,
+      lng: 28.4705,
+      tags: ['walk', 'romantic', 'photo'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Vinnytsia%2C_Soborna_St_at_Night_01.jpg/960px-Vinnytsia%2C_Soborna_St_at_Night_01.jpg'
+    },
+    {
+      id: 'bridge',
+      name: 'Міст на Соборній',
+      type: 'Фотолокація',
+      lat: 49.2325,
+      lng: 28.4650,
+      tags: ['photo', 'walk'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Vinnytsia%2C_Soborna_.st_Bridge.jpg/960px-Vinnytsia%2C_Soborna_.st_Bridge.jpg'
+    },
+    {
+      id: 'tower',
+      name: 'Водонапірна вежа',
+      type: 'Панорама · фото',
+      lat: 49.2348,
+      lng: 28.4655,
+      tags: ['photo', 'walk', 'adventure'],
+      photo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/%D0%92%D0%BE%D0%B4%D0%BE%D0%BD%D0%B0%D0%BF%D1%96%D1%80%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%92%D1%96%D0%BD%D0%BD%D0%B8%D1%86%D1%8F.jpg/960px-%D0%92%D0%BE%D0%B4%D0%BE%D0%BD%D0%B0%D0%BF%D1%96%D1%80%D0%BD%D0%B0_%D0%B2%D0%B5%D0%B6%D0%B0_%D0%92%D1%96%D0%BD%D0%BD%D0%B8%D1%86%D1%8F.jpg'
+    },
+    {
+      id: 'restaurant_center',
+      name: 'Вечеря в центрі',
+      type: 'Ресторан / кафе',
+      lat: 49.2320,
+      lng: 28.4700,
+      tags: ['restaurant', 'wine', 'cafe'],
+      photo: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900&q=80'
+    },
+    {
+      id: 'cinema_place',
+      name: 'Кінотеатр (центр)',
+      type: 'Кіно',
+      lat: 49.2310,
+      lng: 28.4685,
+      tags: ['cinema', 'fun'],
+      photo: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=900&q=80'
+    }
+  ]
 };

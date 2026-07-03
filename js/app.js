@@ -1,15 +1,21 @@
 (function () {
   'use strict';
 
-  const TOTAL_STEPS = 8;
-  const SWIPE_ORDER = ['food', 'activity', 'vibe'];
+  const TOTAL_STEPS = 9;
+  const SWIPE_STEPS = {
+    2: { key: 'priority', cards: () => PRIORITY_CARDS, container: 'prioritySwipe', counter: 'priorityCounter' },
+    3: { key: 'food', cards: () => SWIPE_CARDS.food, container: 'foodSwipe', counter: 'foodCounter' },
+    4: { key: 'activity', cards: () => SWIPE_CARDS.activity, container: 'activitySwipe', counter: 'activityCounter' }
+  };
 
   const state = {
     step: 0,
-    info: {},
-    likes: { food: [], activity: [], vibe: [] },
+    storyIndex: 0,
+    introIndex: 0,
+    likes: { priority: [], food: [], activity: [] },
     datetime: {},
     place: null,
+    applicant: {},
     swipers: {}
   };
 
@@ -22,46 +28,37 @@
 
   let map = null;
   let markers = [];
+  let introTimer = null;
 
-  /** Apply Ukrainian questionnaire strings to the DOM. */
   function applyLocale() {
-    $('#brand').textContent = UI.brand;
-    $('#welcomeTitle').textContent = UI.welcomeTitle;
-    $('#welcomeText').textContent = UI.welcomeText;
-    $('#welcomeFeatures').innerHTML = UI.welcomeFeatures.map((t) => `<li>${t}</li>`).join('');
+    $('#brand').textContent = PROFILE.name;
     $('#startBtn').textContent = UI.start;
-
-    $('#aboutTitle').textContent = UI.aboutYou;
-    $('#aboutSub').textContent = UI.aboutYouSub;
-    $('#labelUserName').textContent = UI.yourName;
-    $('#labelPartnerName').textContent = UI.partnerName;
-    $('#labelInstagram').textContent = UI.instagram;
-    $('#labelTelegram').textContent = UI.telegram;
-    $('#labelCity').textContent = UI.city;
-    $('#infoNextBtn').textContent = UI.next;
-
+    $('#aboutHerTitle').textContent = UI.aboutHerTitle;
+    $('#aboutHerSub').textContent = UI.aboutHerSub;
+    $('#storyNext').textContent = UI.next;
+    $('#priorityTitle').textContent = UI.priorityTitle;
+    $('#prioritySub').textContent = UI.prioritySub;
     $('#foodTitle').textContent = UI.foodTitle;
     $('#foodSub').textContent = UI.foodSub;
     $('#activityTitle').textContent = UI.activityTitle;
     $('#activitySub').textContent = UI.activitySub;
-    $('#vibeTitle').textContent = UI.vibeTitle;
-    $('#vibeSub').textContent = UI.vibeSub;
-
     $('#whenTitle').textContent = UI.whenTitle;
     $('#whenSub').textContent = UI.whenSub;
     $('#labelDate').textContent = UI.date;
     $('#labelTime').textContent = UI.time;
     $('#datetimeNextBtn').textContent = UI.next;
-
     $('#whereTitle').textContent = UI.whereTitle;
     $('#whereSub').textContent = UI.whereSub;
     $('#placeNextBtn').textContent = UI.next;
-
-    $('#planReadyTitle').textContent = UI.planReady;
-    $('#messageLabel').textContent = UI.messageLabel;
-    $('#copyBtn').textContent = UI.copyPlan;
-    $('#telegramBtn').textContent = UI.openTelegram;
-    $('#restartBtn').textContent = UI.restart;
+    $('#applyTitle').textContent = UI.applyTitle;
+    $('#applySub').textContent = UI.applySub;
+    $('#labelName').textContent = UI.yourName;
+    $('#labelNote').textContent = UI.note;
+    $('#noteInput').placeholder = UI.notePlaceholder;
+    $('#submitBtn').textContent = UI.submit;
+    $('#doneTitle').textContent = UI.doneTitle;
+    $('#doneText').textContent = UI.doneText;
+    $('#doneHint').textContent = UI.doneHint;
   }
 
   function showToast(msg) {
@@ -77,37 +74,117 @@
 
     state.step = n;
     progressBar.style.width = `${((n + 1) / TOTAL_STEPS) * 100}%`;
-    stepLabel.textContent = n === 0 ? UI.welcome : UI.step(n, TOTAL_STEPS - 1);
 
+    if (n === 0) {
+      stepLabel.textContent = UI.welcome;
+      startIntroCarousel();
+    } else {
+      stopIntroCarousel();
+      stepLabel.textContent = UI.step(n, TOTAL_STEPS - 1);
+    }
+
+    if (n === 1) renderStory();
     if (n === 6) initMapStep();
-    if (n === 7) renderSummary();
+    if (n === 7) renderPreview();
   }
 
-  function initCitySelect() {
-    const select = $('#citySelect');
-    Object.entries(CITIES).forEach(([id, city]) => {
-      const opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = city.name;
-      select.appendChild(opt);
+  /* —— Intro gallery —— */
+  function renderIntro() {
+    const photos = PROFILE.photos;
+    const gallery = $('#introGallery');
+    gallery.innerHTML = photos.map((p, i) => `
+      <div class="intro__slide${i === 0 ? ' intro__slide--active' : ''}" style="background-image:url('${p.src}')"></div>
+    `).join('');
+
+    $('#introDots').innerHTML = photos.map((_, i) =>
+      `<button type="button" class="intro__dot${i === 0 ? ' intro__dot--active' : ''}" data-intro="${i}"></button>`
+    ).join('');
+
+    $('#introMeta').textContent = UI.ageCity(PROFILE.age, PROFILE.city);
+    $('#introTitle').textContent = PROFILE.name;
+    $('#introTagline').textContent = PROFILE.tagline;
+    updateIntroCaption(0);
+
+    $$('#introDots .intro__dot').forEach((dot) => {
+      dot.addEventListener('click', () => showIntroSlide(Number(dot.dataset.intro)));
     });
   }
 
-  function initDateDefaults() {
-    const dateInput = $('#dateInput');
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.min = new Date().toISOString().split('T')[0];
-    dateInput.value = tomorrow.toISOString().split('T')[0];
+  function updateIntroCaption(i) {
+    const photo = PROFILE.photos[i];
+    $('#introText').textContent = photo ? photo.text : '';
   }
 
+  function showIntroSlide(i) {
+    state.introIndex = i;
+    $$('.intro__slide').forEach((el, idx) => {
+      el.classList.toggle('intro__slide--active', idx === i);
+    });
+    $$('.intro__dot').forEach((el, idx) => {
+      el.classList.toggle('intro__dot--active', idx === i);
+    });
+    updateIntroCaption(i);
+  }
+
+  function startIntroCarousel() {
+    stopIntroCarousel();
+    introTimer = setInterval(() => {
+      const next = (state.introIndex + 1) % PROFILE.photos.length;
+      showIntroSlide(next);
+    }, 3500);
+  }
+
+  function stopIntroCarousel() {
+    if (introTimer) {
+      clearInterval(introTimer);
+      introTimer = null;
+    }
+  }
+
+  /* —— Story about her —— */
+  function renderStory() {
+    const photos = PROFILE.photos;
+    const i = state.storyIndex;
+    const photo = photos[i];
+    $('#storyStack').innerHTML = `
+      <div class="story-card">
+        <div class="story-card__photo" style="background-image:url('${photo.src}')"></div>
+        <div class="story-card__body">
+          <div class="story-card__caption">${photo.caption}</div>
+          <p class="story-card__text">${photo.text}</p>
+        </div>
+      </div>
+    `;
+    $('#storyCounter').textContent = `${i + 1} / ${photos.length}`;
+    $('#storyPrev').disabled = i === 0;
+    $('#storyNext').textContent = i === photos.length - 1 ? UI.next : '→';
+  }
+
+  function storyNext() {
+    if (state.storyIndex < PROFILE.photos.length - 1) {
+      state.storyIndex++;
+      renderStory();
+    } else {
+      goToStep(2);
+    }
+  }
+
+  function storyPrev() {
+    if (state.storyIndex > 0) {
+      state.storyIndex--;
+      renderStory();
+    }
+  }
+
+  /* —— Swipe stacks —— */
   class SwipeStack {
-    constructor(containerId, category, counterId, onComplete) {
-      this.container = document.getElementById(containerId);
-      this.category = category;
-      this.counterEl = document.getElementById(counterId);
-      this.onComplete = onComplete;
-      this.cards = [...SWIPE_CARDS[category]];
+    constructor(stepNum) {
+      const cfg = SWIPE_STEPS[stepNum];
+      this.stepNum = stepNum;
+      this.key = cfg.key;
+      this.container = document.getElementById(cfg.container);
+      this.counterEl = document.getElementById(cfg.counter);
+      this.cards = [...cfg.cards()];
       this.index = 0;
       this.currentEl = null;
       this.drag = { active: false, startX: 0, startY: 0, x: 0, y: 0 };
@@ -117,7 +194,7 @@
     render() {
       this.container.innerHTML = '';
       if (this.index >= this.cards.length) {
-        this.onComplete();
+        goToStep(this.stepNum + 1);
         return;
       }
 
@@ -125,12 +202,11 @@
       const el = document.createElement('div');
       el.className = 'swipe-card';
       el.innerHTML = `
-        <div class="swipe-card__bg" style="background:${card.gradient}"></div>
+        <div class="swipe-card__bg" style="background-image:url('${card.photo}')"></div>
         <div class="swipe-card__overlay"></div>
         <div class="swipe-card__stamp swipe-card__stamp--yes">${UI.swipeYes}</div>
         <div class="swipe-card__stamp swipe-card__stamp--no">${UI.swipeNo}</div>
         <div class="swipe-card__content">
-          <div class="swipe-card__emoji">${card.emoji}</div>
           <div class="swipe-card__title">${card.title}</div>
           <div class="swipe-card__desc">${card.desc}</div>
         </div>
@@ -138,10 +214,6 @@
       this.container.appendChild(el);
       this.currentEl = el;
       this.bindEvents(el);
-      this.updateCounter();
-    }
-
-    updateCounter() {
       this.counterEl.textContent = `${this.index + 1} / ${this.cards.length}`;
     }
 
@@ -149,7 +221,6 @@
       const onStart = (e) => {
         const pt = e.touches ? e.touches[0] : e;
         this.drag = { active: true, startX: pt.clientX, startY: pt.clientY, x: 0, y: 0 };
-        el.style.cursor = 'grabbing';
       };
 
       const onMove = (e) => {
@@ -158,19 +229,14 @@
         const pt = e.touches ? e.touches[0] : e;
         this.drag.x = pt.clientX - this.drag.startX;
         this.drag.y = pt.clientY - this.drag.startY;
-        const rot = this.drag.x * 0.08;
-        el.style.transform = `translate(${this.drag.x}px, ${this.drag.y}px) rotate(${rot}deg)`;
-
-        const yesStamp = el.querySelector('.swipe-card__stamp--yes');
-        const noStamp = el.querySelector('.swipe-card__stamp--no');
-        yesStamp.style.opacity = Math.min(Math.max(this.drag.x / 80, 0), 1);
-        noStamp.style.opacity = Math.min(Math.max(-this.drag.x / 80, 0), 1);
+        el.style.transform = `translate(${this.drag.x}px, ${this.drag.y}px) rotate(${this.drag.x * 0.08}deg)`;
+        el.querySelector('.swipe-card__stamp--yes').style.opacity = Math.min(Math.max(this.drag.x / 80, 0), 1);
+        el.querySelector('.swipe-card__stamp--no').style.opacity = Math.min(Math.max(-this.drag.x / 80, 0), 1);
       };
 
       const onEnd = () => {
         if (!this.drag.active) return;
         this.drag.active = false;
-        el.style.cursor = 'grab';
         if (Math.abs(this.drag.x) > 100) {
           this.swipe(this.drag.x > 0 ? 'right' : 'left');
         } else {
@@ -192,9 +258,7 @@
 
     swipe(direction) {
       const card = this.cards[this.index];
-      if (direction === 'right') {
-        state.likes[this.category].push(card.id);
-      }
+      if (direction === 'right') state.likes[this.key].push(card.id);
 
       const el = this.currentEl;
       el.classList.add('swipe-card--animating');
@@ -210,42 +274,26 @@
   }
 
   function initSwipers() {
-    SWIPE_ORDER.forEach((cat, i) => {
-      const stepNum = i + 2;
-      const containerMap = { food: 'foodSwipe', activity: 'activitySwipe', vibe: 'vibeSwipe' };
-      const counterMap = { food: 'foodCounter', activity: 'activityCounter', vibe: 'vibeCounter' };
-
-      state.swipers[cat] = new SwipeStack(
-        containerMap[cat],
-        cat,
-        counterMap[cat],
-        () => goToStep(stepNum + 1)
-      );
+    Object.keys(SWIPE_STEPS).forEach((step) => {
+      state.swipers[step] = new SwipeStack(Number(step));
     });
   }
 
   function handleSwipeButtons(e) {
     const btn = e.target.closest('[data-swipe]');
     if (!btn) return;
-    const cat = SWIPE_ORDER[state.step - 2];
-    if (cat && state.swipers[cat]) {
-      state.swipers[cat].swipe(btn.dataset.swipe);
-    }
+    const swiper = state.swipers[state.step];
+    if (swiper) swiper.swipe(btn.dataset.swipe);
   }
 
-  function getCity() {
-    return CITIES[state.info.city] || CITIES.kyiv;
-  }
-
+  /* —— Places —— */
   function scorePlace(place) {
-    const allLikes = [...state.likes.food, ...state.likes.activity, ...state.likes.vibe];
-    return place.tags.filter((t) => allLikes.includes(t)).length;
+    const all = [...state.likes.food, ...state.likes.activity, ...state.likes.priority];
+    return place.tags.filter((t) => all.includes(t)).length;
   }
 
   function initMapStep() {
-    const city = getCity();
-    const places = [...city.places].sort((a, b) => scorePlace(b) - scorePlace(a));
-
+    const places = [...VINNYTSIA.places].sort((a, b) => scorePlace(b) - scorePlace(a));
     const list = $('#placesList');
     list.innerHTML = '';
 
@@ -254,8 +302,11 @@
       card.className = 'place-card' + (i === 0 ? ' place-card--active' : '');
       card.dataset.id = place.id;
       card.innerHTML = `
-        <div class="place-card__name">${place.name}</div>
-        <div class="place-card__type">${place.type}</div>
+        <div class="place-card__photo" style="background-image:url('${place.photo}')"></div>
+        <div class="place-card__body">
+          <div class="place-card__name">${place.name}</div>
+          <div class="place-card__type">${place.type}</div>
+        </div>
       `;
       card.addEventListener('click', () => selectPlace(place, card));
       list.appendChild(card);
@@ -270,7 +321,7 @@
     }
 
     setTimeout(() => {
-      map = L.map('map', { zoomControl: false }).setView(city.center, city.zoom);
+      map = L.map('map', { zoomControl: false }).setView(VINNYTSIA.center, VINNYTSIA.zoom);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
       }).addTo(map);
@@ -306,77 +357,54 @@
     });
   }
 
+  /* —— Application —— */
   function formatDate(dateStr) {
     const d = new Date(dateStr + 'T12:00:00');
     return d.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
-  function pickLabels(likes, labelMap, fallback) {
-    if (!likes.length) return fallback;
-    return likes.map((id) => labelMap[id] || id).join(', ');
+  function pickLabels(likes, map) {
+    if (!likes.length) return '—';
+    return likes.map((id) => map[id] || id).join(', ');
   }
 
-  function buildPlanDescription() {
-    const food = pickLabels(state.likes.food, FOOD_LABELS, UI.planFallbackFood);
-    const activity = pickLabels(state.likes.activity, ACTIVITY_LABELS, UI.planFallbackActivity);
-    const vibe = state.likes.vibe[0] || 'cozy';
-    const template = DATE_PLAN_TEMPLATES[vibe] || DATE_PLAN_TEMPLATES.default;
-
-    return template
-      .replace('{food}', food.toLowerCase())
-      .replace('{activity}', activity.toLowerCase())
-      .replace('{time}', state.datetime.time || '19:00');
+  function buildApplicationPayload() {
+    return {
+      name: state.applicant.name,
+      note: state.applicant.note || '',
+      priorities: pickLabels(state.likes.priority, LABELS.priority),
+      food: pickLabels(state.likes.food, LABELS.food),
+      activity: pickLabels(state.likes.activity, LABELS.activity),
+      date: state.datetime.date,
+      time: state.datetime.time,
+      place: state.place.name,
+      placeType: state.place.type,
+      city: VINNYTSIA.name,
+      submittedAt: new Date().toISOString()
+    };
   }
 
-  function buildMessage() {
-    const { partnerName, userName, instagram, telegram } = state.info;
-    const food = pickLabels(state.likes.food, FOOD_LABELS, '—');
-    const activity = pickLabels(state.likes.activity, ACTIVITY_LABELS, '—');
-    const vibe = pickLabels(state.likes.vibe, VIBE_LABELS, '—');
-    const dateFormatted = formatDate(state.datetime.date);
-    const time = state.datetime.time;
-    const place = state.place;
-    const city = getCity();
-    const plan = buildPlanDescription();
-    const mapsUrl = `https://www.google.com/maps?q=${place.lat},${place.lng}`;
-
-    let msg = `${UI.messageGreeting(partnerName)}\n\n`;
-    msg += `${UI.messageIntro}\n\n`;
-    msg += `📅 ${dateFormatted}, о ${time}\n`;
-    msg += `📍 ${place.name} (${city.name})\n`;
-    msg += `🗺 ${mapsUrl}\n\n`;
-    msg += `🍽 Їжа: ${food}\n`;
-    msg += `🎯 Активність: ${activity}\n`;
-    msg += `✨ Атмосфера: ${vibe}\n\n`;
-    msg += `💡 План вечора:\n${plan}\n\n`;
-    msg += `${UI.messageWaiting}\n`;
-    msg += `— ${userName}`;
-
-    if (instagram) {
-      const insta = instagram.startsWith('@') ? instagram : `@${instagram}`;
-      msg += `\n\n📸 Instagram: ${insta}`;
-    }
-
-    return msg;
-  }
-
-  function renderSummary() {
-    const { partnerName } = state.info;
-    $('#summarySubtitle').textContent = UI.planFor(partnerName);
-
-    const food = pickLabels(state.likes.food, FOOD_LABELS, '—');
-    const activity = pickLabels(state.likes.activity, ACTIVITY_LABELS, '—');
-    const vibe = pickLabels(state.likes.vibe, VIBE_LABELS, '—');
+  function renderPreview() {
+    const food = pickLabels(state.likes.food, LABELS.food);
+    const activity = pickLabels(state.likes.activity, LABELS.activity);
+    const priorities = pickLabels(state.likes.priority, LABELS.priority);
     const dateFormatted = formatDate(state.datetime.date);
 
-    $('#summaryCard').innerHTML = `
+    $('#previewCard').innerHTML = `
+      <div class="preview-place" style="background-image:url('${state.place.photo}')">
+        <div class="preview-place__label">${state.place.name}</div>
+      </div>
       <div class="summary__row">
         <span class="summary__row-icon">📅</span>
-        <div><span class="summary__row-label">${UI.summaryDate}</span>${dateFormatted}, ${state.datetime.time}</div>
+        <div><span class="summary__row-label">${UI.summaryWhen}</span>${dateFormatted}, ${state.datetime.time}</div>
       </div>
       <div class="summary__row">
         <span class="summary__row-icon">📍</span>
-        <div><span class="summary__row-label">${UI.summaryPlace}</span>${state.place.name}, ${getCity().name}</div>
+        <div><span class="summary__row-label">${UI.summaryPlace}</span>${state.place.name}</div>
+      </div>
+      <div class="summary__row">
+        <span class="summary__row-icon">💗</span>
+        <div><span class="summary__row-label">${UI.summaryPriorities}</span>${priorities}</div>
       </div>
       <div class="summary__row">
         <span class="summary__row-icon">🍽</span>
@@ -386,71 +414,75 @@
         <span class="summary__row-icon">🎯</span>
         <div><span class="summary__row-label">${UI.summaryActivity}</span>${activity}</div>
       </div>
-      <div class="summary__row">
-        <span class="summary__row-icon">✨</span>
-        <div><span class="summary__row-label">${UI.summaryVibe}</span>${vibe}</div>
-      </div>
-      <div class="summary__row">
-        <span class="summary__row-icon">💡</span>
-        <div><span class="summary__row-label">${UI.summaryPlan}</span>${buildPlanDescription()}</div>
-      </div>
     `;
-
-    $('#messageText').value = buildMessage();
-    $('#copyHint').textContent = '';
   }
 
-  function normalizeTelegram(handle) {
-    if (!handle) return '';
-    return handle.replace(/^@/, '').trim();
+  function saveLocal(payload) {
+    const key = 'vechir_applications';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    list.unshift(payload);
+    localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
   }
 
-  async function copyMessage() {
-    const text = $('#messageText').value;
+  async function sendApplication(payload) {
+    saveLocal(payload);
+
+    const email = (PROFILE.applicationEmail || '').trim();
+    if (!email) return true;
+
+    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({
+        _subject: `Заявка на побачення: ${payload.name}`,
+        name: payload.name,
+        note: payload.note,
+        priorities: payload.priorities,
+        food: payload.food,
+        activity: payload.activity,
+        when: `${payload.date} ${payload.time}`,
+        place: `${payload.place} (${payload.city})`,
+        submittedAt: payload.submittedAt
+      })
+    });
+
+    return res.ok;
+  }
+
+  async function handleApply(e) {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    state.applicant = {
+      name: fd.get('name').trim(),
+      note: fd.get('note').trim()
+    };
+
+    const btn = $('#submitBtn');
+    btn.disabled = true;
+    btn.textContent = UI.submitting;
+
     try {
-      await navigator.clipboard.writeText(text);
-      showToast(UI.toastCopied);
-      $('#copyHint').textContent = UI.copyHint;
+      const payload = buildApplicationPayload();
+      const ok = await sendApplication(payload);
+      if (!ok) throw new Error('send failed');
+      showToast(UI.toastSent);
+      goToStep(8);
     } catch {
-      $('#messageText').select();
-      document.execCommand('copy');
-      showToast(UI.toastCopied);
+      showToast(UI.toastError);
+      btn.disabled = false;
+      btn.textContent = UI.submit;
     }
   }
 
-  function openTelegram() {
-    const text = encodeURIComponent($('#messageText').value);
-    const username = normalizeTelegram(state.info.telegram);
-
-    copyMessage();
-
-    setTimeout(() => {
-      if (username) {
-        window.open(`https://t.me/${username}`, '_blank');
-        showToast(UI.toastTelegramOpen);
-      } else {
-        window.open(`https://t.me/share/url?text=${text}`, '_blank');
-        showToast(UI.toastTelegramShare);
-      }
-    }, 400);
-  }
-
-  function restart() {
-    state.info = {};
-    state.likes = { food: [], activity: [], vibe: [] };
-    state.datetime = {};
-    state.place = null;
-    SWIPE_ORDER.forEach((cat) => {
-      state.swipers[cat] = new SwipeStack(
-        { food: 'foodSwipe', activity: 'activitySwipe', vibe: 'vibeSwipe' }[cat],
-        cat,
-        { food: 'foodCounter', activity: 'activityCounter', vibe: 'vibeCounter' }[cat],
-        () => goToStep(SWIPE_ORDER.indexOf(cat) + 3)
-      );
-    });
-    $('#infoForm').reset();
-    initDateDefaults();
-    goToStep(0);
+  function initDateDefaults() {
+    const dateInput = $('#dateInput');
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dateInput.min = new Date().toISOString().split('T')[0];
+    dateInput.value = tomorrow.toISOString().split('T')[0];
   }
 
   function bindEvents() {
@@ -460,18 +492,8 @@
 
     document.addEventListener('click', handleSwipeButtons);
 
-    $('#infoForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      state.info = {
-        userName: fd.get('userName').trim(),
-        partnerName: fd.get('partnerName').trim(),
-        instagram: fd.get('instagram').trim(),
-        telegram: fd.get('telegram').trim(),
-        city: fd.get('city')
-      };
-      goToStep(2);
-    });
+    $('#storyNext').addEventListener('click', storyNext);
+    $('#storyPrev').addEventListener('click', storyPrev);
 
     $('#datetimeForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -488,14 +510,13 @@
       });
     });
 
-    $('#copyBtn').addEventListener('click', copyMessage);
-    $('#telegramBtn').addEventListener('click', openTelegram);
-    $('#restartBtn').addEventListener('click', restart);
+    $('#applyForm').addEventListener('submit', handleApply);
   }
 
   function init() {
+    document.title = `${PROFILE.name} · ${PROFILE.city}`;
     applyLocale();
-    initCitySelect();
+    renderIntro();
     initDateDefaults();
     initSwipers();
     bindEvents();

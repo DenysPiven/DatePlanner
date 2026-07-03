@@ -1,70 +1,54 @@
 /**
  * Ukrainian questionnaire copy (user-facing UI only).
- * Code, docs, and comments elsewhere are in English.
  */
 const UI = {
-  brand: '✨ Vechir',
-  welcome: 'Ласкаво просимо',
-  step: (n, total) => `Крок ${n} з ${total}`,
+  brand: (name) => name,
+  welcome: 'Знайомство',
+  step: (n, total) => `${n} / ${total}`,
 
-  welcomeTitle: 'Планер побачення',
-  welcomeText: 'Заповни анкету зі свайпами, обери місце на карті — і отримай готовий план, який можна одразу надіслати в Telegram.',
-  welcomeFeatures: [
-    '🍕 Обери їжу та активності',
-    '📍 Місце зустрічі на карті',
-    '📋 Готове повідомлення для ЛС'
-  ],
-  start: 'Почати',
-
-  aboutYou: 'Про тебе',
-  aboutYouSub: 'Базова інформація для персоналізації плану',
-  yourName: "Твоє ім'я",
-  partnerName: "Ім'я (кому надсилаєш план)",
-  instagram: 'Instagram',
-  telegram: 'Telegram (кому написати)',
-  city: 'Місто',
+  start: 'Хочу на побачення',
   next: 'Далі',
-
-  foodTitle: 'Що їсти?',
-  foodSub: 'Свайп вправо — так, вліво — ні',
-  activityTitle: 'Чим зайнятись?',
-  activitySub: 'Обери, що подобається',
-  vibeTitle: 'Яка атмосфера?',
-  vibeSub: 'Як має відчуватись вечір',
   swipeYes: 'ТАК',
   swipeNo: 'НІ',
 
-  whenTitle: 'Коли зустрінемось?',
-  whenSub: 'Обери дату та час побачення',
+  aboutHerTitle: 'Трохи про мене',
+  aboutHerSub: 'Гортай фото — так зрозумієш, чи ми на одній хвилі',
+
+  priorityTitle: 'Що для мене важливо',
+  prioritySub: 'Свайп вправо — якщо це про тебе. Вліво — якщо ні',
+
+  foodTitle: 'Що поїсти?',
+  foodSub: 'Обери, що тобі заходить',
+  activityTitle: 'Чим зайнятись?',
+  activitySub: 'Як проведемо час у Вінниці',
+
+  whenTitle: 'Коли зручно?',
+  whenSub: 'Обери день і час — я подивлюсь, чи підходить',
   date: 'Дата',
   time: 'Час',
 
-  whereTitle: 'Де зустрінемось?',
-  whereSub: 'Обери місце на карті або зі списку',
+  whereTitle: 'Куди підемо Вінницею?',
+  whereSub: 'Обери місце з фото — або на карті',
 
-  planReady: 'План готовий!',
-  planFor: (name) => `План побачення для ${name}`,
-  messageLabel: 'Повідомлення для Telegram',
-  copyPlan: '📋 Скопіювати план',
-  openTelegram: '✈️ Написати в Telegram',
-  restart: 'Почати спочатку',
+  applyTitle: 'Залишити заявку',
+  applySub: 'Без телефону і соцмереж. Якщо підійдеш — я напишу тобі в Тіндері',
+  yourName: "Твоє ім'я (як у Тіндері)",
+  note: 'Кілька слів про себе (необовʼязково)',
+  notePlaceholder: 'Наприклад: люблю кіно і довгі прогулянки…',
+  submit: 'Надіслати заявку',
+  submitting: 'Надсилаю…',
 
-  summaryDate: 'Дата та час',
-  summaryPlace: 'Місце',
+  doneTitle: 'Заявку надіслано',
+  doneText: 'Я подивлюсь відповіді і сама вирішу, з ким піти. Якщо відгукнусь — напишу тобі в Тіндері.',
+  doneHint: 'Можеш закрити сторінку',
+
+  summaryPriorities: 'Що відгукнулось',
   summaryFood: 'Їжа',
   summaryActivity: 'Активність',
-  summaryVibe: 'Атмосфера',
-  summaryPlan: 'План',
+  summaryWhen: 'Коли',
+  summaryPlace: 'Місце',
 
-  toastCopied: '✅ План скопійовано!',
-  copyHint: 'Тепер відкрий Telegram і встав у повідомлення',
-  toastTelegramOpen: '✈️ Відкрито чат — встав план',
-  toastTelegramShare: '✈️ Обери кому надіслати',
-
-  messageGreeting: (name) => `Привіт, ${name}! 💫`,
-  messageIntro: 'Я склав для нас план побачення:',
-  messageWaiting: 'Чекаю на тебе! 🌸',
-
-  planFallbackFood: 'смачну вечерю',
-  planFallbackActivity: 'прогулянку'
+  toastSent: '✅ Заявку надіслано',
+  toastError: 'Не вдалось надіслати. Спробуй ще раз',
+  ageCity: (age, city) => `${age} · ${city}`
 };

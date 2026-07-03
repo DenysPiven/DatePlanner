@@ -1,55 +1,38 @@
-# DatePlanner (Vechir)
+# DatePlanner
 
-Mobile-first date planner questionnaire. **Questionnaire UI is in Ukrainian**; code, docs, and comments are in English.
+Personal date invitation page for Tinder. She shares the link; he fills the questionnaire and leaves an application. She decides who to meet.
 
-Static site — runs on GitHub Pages with no build step.
+**Questionnaire UI is in Ukrainian.** Code and docs are in English.
 
-## Features
+Live: https://denyspiven.github.io/DatePlanner/
 
-- Basic info: name, recipient name, Instagram, Telegram, city
-- Tinder-style swipe cards: food, activities, vibe
-- Date & time picker
-- Meeting place on map (Leaflet + OpenStreetMap)
-- Generated date plan message — copy or open Telegram
+## Flow
 
-## Cities
+1. Her photos & story
+2. Questions she cares about (intentions, respect, communication…)
+3. Food & activities (photo cards)
+4. Date & time
+5. Places in **Vinnytsia** (photos + map)
+6. Application: name + optional note — **no contacts, no Telegram**
 
-Kyiv, Lviv, Odesa — with curated meeting spots. Places are ranked by swipe answers.
+## Customize
 
-## Live demo
+Edit `js/config.js`:
 
-```
-https://denyspiven.github.io/DatePlanner/
-```
+- `name`, `age`, `tagline`, `photos` — replace stock photos with yours (`images/profile/…`)
+- `applicationEmail` — FormSubmit delivers applications to your email (confirm once)
+
+Without `applicationEmail`, applications are only saved in the browser (`localStorage`) — set the email to receive them.
 
 ## Local dev
 
 ```bash
 python3 -m http.server 8080
-# open http://localhost:8080
 ```
-
-## Project structure
-
-```
-├── index.html
-├── css/style.css
-├── js/
-│   ├── i18n.js   # Ukrainian UI strings (questionnaire)
-│   ├── data.js   # Swipe cards & places (Ukrainian)
-│   └── app.js    # App logic (English comments)
-└── README.md
-```
-
-## GitHub Pages setup
-
-**Settings → Pages → Source: Deploy from a branch** → `main` / `/` (root)
 
 ## Stack
 
-- Vanilla HTML / CSS / JavaScript
-- [Leaflet](https://leafletjs.com/) + OpenStreetMap
-- 100% client-side
+Vanilla HTML / CSS / JS, Leaflet, GitHub Pages (branch `main`).
 
 ## License
 

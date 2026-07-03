@@ -138,52 +138,147 @@ body::before {
   line-height: 1.45;
 }
 
-/* Welcome */
-.welcome {
+/* Intro (her profile) */
+.intro {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding-top: 24px;
+  min-height: 100%;
+  padding-bottom: 8px;
 }
 
-.welcome__icon {
-  font-size: 3.5rem;
-  margin-bottom: 16px;
-  animation: float 3s ease-in-out infinite;
+.intro__gallery {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  max-height: min(52vh, 420px);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  background: var(--bg-card);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.intro__slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
-.welcome__title {
+.intro__slide--active {
+  opacity: 1;
+}
+
+.intro__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.intro__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: width 0.2s, background 0.2s;
+}
+
+.intro__dot--active {
+  width: 18px;
+  background: var(--accent);
+}
+
+.intro__meta {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.intro__title {
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
-.welcome__text {
+.intro__tagline {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+.intro__text {
   color: var(--text-muted);
-  line-height: 1.55;
-  margin-bottom: 28px;
-  max-width: 320px;
-}
-
-.welcome__features {
-  list-style: none;
-  text-align: left;
-  width: 100%;
-  max-width: 300px;
-  margin-bottom: 32px;
-}
-
-.welcome__features li {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  line-height: 1.5;
+  margin-bottom: 20px;
   font-size: 0.95rem;
+}
+
+/* Story about her */
+.story {
+  margin-bottom: 16px;
+}
+
+.story-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.story-card__photo {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: min(48vh, 380px);
+  background-size: cover;
+  background-position: center top;
+}
+
+.story-card__body {
+  padding: 18px 18px 20px;
+}
+
+.story-card__caption {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.story-card__text {
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.story__nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.story__nav .btn--primary {
+  flex: 1;
+}
+
+.story__counter {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 48px;
+  text-align: center;
+}
+
+.story__nav .btn--ghost:disabled {
+  opacity: 0.3;
 }
 
 /* Form */
@@ -242,6 +337,10 @@ body::before {
   min-height: 180px;
   line-height: 1.5;
   font-size: 0.9rem;
+}
+
+.field__textarea--short {
+  min-height: 88px;
 }
 
 /* Buttons */
@@ -351,6 +450,7 @@ body::before {
   inset: 0;
   background-size: cover;
   background-position: center;
+  background-color: var(--bg-elevated);
 }
 
 .swipe-card__overlay {
@@ -365,11 +465,6 @@ body::before {
   left: 0;
   right: 0;
   padding: 28px 24px;
-}
-
-.swipe-card__emoji {
-  font-size: 2.5rem;
-  margin-bottom: 8px;
 }
 
 .swipe-card__title {
@@ -466,19 +561,31 @@ body::before {
 
 .place-card {
   flex: 0 0 auto;
-  width: 200px;
-  padding: 14px;
+  width: 220px;
   border-radius: var(--radius-sm);
   border: 2px solid var(--border);
   background: var(--bg-card);
   cursor: pointer;
   scroll-snap-align: start;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, transform 0.15s;
+  overflow: hidden;
 }
 
 .place-card--active {
   border-color: var(--accent);
-  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.place-card__photo {
+  width: 100%;
+  height: 120px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--bg-elevated);
+}
+
+.place-card__body {
+  padding: 12px 14px 14px;
 }
 
 .place-card__name {
@@ -506,23 +613,57 @@ body::before {
   background: var(--bg-elevated);
 }
 
-/* Summary */
-.summary {
-  padding-bottom: 24px;
-}
-
-.summary__icon {
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 8px;
-}
-
+/* Summary / preview / done */
 .summary__card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 0 0 8px;
   margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.preview-place {
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.preview-place__label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px 16px 12px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.summary__card .summary__row {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 48px;
+}
+
+.done__icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.done__hint {
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .summary__row {
