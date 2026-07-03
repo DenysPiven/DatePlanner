@@ -643,12 +643,11 @@
 
   function initDateDefaults() {
     const dateInput = $('#dateInput');
+    const today = new Date();
     const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    dateInput.min = new Date().toISOString().split('T')[0];
-    if (!dateInput.value) {
-      dateInput.value = tomorrow.toISOString().split('T')[0];
-    }
+    tomorrow.setDate(today.getDate() + 1);
+    dateInput.min = today.toISOString().split('T')[0];
+    dateInput.value = tomorrow.toISOString().split('T')[0];
   }
 
   function bindEvents() {
