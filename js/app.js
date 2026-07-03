@@ -500,7 +500,6 @@
       : null;
 
     return {
-      userAgent: nav.userAgent || '',
       platform: nav.platform || '',
       language: nav.language || '',
       languages: Array.isArray(nav.languages) ? nav.languages.join(', ') : '',

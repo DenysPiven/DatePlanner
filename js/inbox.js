@@ -138,8 +138,7 @@
       ['PDF viewer', device.pdfViewer ? 'так' : 'ні'],
       ['Vendor', device.vendor || ''],
       ['Браузер (бренди)', device.uaData && device.uaData.brands ? device.uaData.brands : ''],
-      ['Автоматизація', device.webdriver ? '⚠️ так (webdriver)' : 'ні'],
-      ['User-Agent', device.userAgent || '']
+      ['Автоматизація', device.webdriver ? '⚠️ так (webdriver)' : 'ні']
     ];
 
     return rows.filter(([, value]) => value !== '' && value != null);
